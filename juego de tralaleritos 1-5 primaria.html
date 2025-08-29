@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mundo de Aprendizaje - Selección de Personaje</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+        }
+        
+        body {
+            background: radial-gradient(circle at center, #2c5aa0 0%, #1e3a8a 60%, #0f172a 100%);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            color: white;
+        }
+        
+        .selection-container {
+            text-align: center;
+            width: 100%;
+            max-width: 1100px;
+            position: relative;
+        }
+        
+        .title {
+            font-size: 4rem;
+            font-weight: bold;
+            margin-bottom: 30px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.7);
+            letter-spacing: 2px;
+            color: #ffffff;
+        }
+        
+        .subtitle {
+            font-size: 1.6rem;
+            margin-bottom: 40px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            color: #85c1e9;
+        }
+        
+        .character-display {
+            position: relative;
+            margin-bottom: 40px;
+            height: 480px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        
+        .character-image-container {
+            width: 380px;
+            height: 380px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .character-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            transition: all 0.4s ease;
+            filter: drop-shadow(0 15px 30px rgba(0,0,0,0.4));
+        }
+        
+        .character-image:hover {
+            transform: scale(1.08);
+            filter: drop-shadow(0 20px 40px rgba(0,0,0,0.6));
+        }
+        
+        .navigation-arrows {
+            position: absolute;
+            top: 45%;
+            transform: translateY(-50%);
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            pointer-events: none;
+            padding: 0 20px;
+        }
+        
+        .nav-button {
+            background: rgba(255,255,255,0.15);
+            border: 3px solid rgba(255,255,255,0.4);
+            border-radius: 50%;
+            width: 85px;
+            height: 85px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            pointer-events: all;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .nav-button:hover {
+            background: rgba(255,255,255,0.25);
+            transform: scale(1.15);
+            border-color: rgba(255,255,255,0.7);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+        }
+        
+        .nav-button:active {
+            transform: scale(1.05);
+        }
+        
+        .nav-arrow {
+            font-size: 2.2rem;
+            color: white;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+        }
+        
+        .character-info {
+            text-align: center;
+            padding: 0 30px;
+            max-width: 800px;
+        }
+        
+        .character-name {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 18px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.8);
+            color: #f8c471;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .character-description {
+            font-size: 1.3rem;
+            margin: 0 auto 12px;
+            line-height: 1.6;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
+            color: #e8f5e8;
+        }
+        
+        .character-power {
+            font-size: 1.2rem;
+            color: #a8e6cf;
+            font-weight: bold;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
+        }
+        
+        .bottom-controls {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 25px;
+            align-items: center;
+        }
+        
+        .control-hint {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0,0,0,0.75);
+            padding: 10px 18px;
+            border-radius: 22px;
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(255,255,255,0.25);
+        }
+        
+        .control-icon {
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(45deg, #ff6b9d, #c44569);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.8rem;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+        }
+        
+        .control-icon.select {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+        }
+        
+        .control-text {
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        
+        .select-button {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            border: none;
+            padding: 14px 30px;
+            border-radius: 22px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 18px rgba(68, 160, 141, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .select-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(68, 160, 141, 0.6);
+            background: linear-gradient(45deg, #5fd3ca, #4db6a8);
+        }
+        
+        .select-button:active {
+            transform: translateY(0);
+        }
+        
+        .character-counter {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            background: rgba(0,0,0,0.75);
+            color: white;
+            padding: 10px 18px;
+            border-radius: 18px;
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(255,255,255,0.25);
+            font-weight: bold;
+            font-size: 1rem;
+        }
+        
+        .floating-decoration {
+            position: absolute;
+            font-size: 1.8rem;
+            animation: float 4s ease-in-out infinite;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+        
+        .decoration-1 { top: 12%; left: 8%; animation-delay: 0s; }
+        .decoration-2 { top: 20%; right: 12%; animation-delay: 1.2s; }
+        .decoration-3 { bottom: 18%; left: 6%; animation-delay: 2.4s; }
+        .decoration-4 { bottom: 25%; right: 10%; animation-delay: 0.8s; }
+        .decoration-5 { top: 30%; left: 88%; animation-delay: 1.8s; }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.6; }
+            50% { transform: translateY(-18px) rotate(8deg); opacity: 1; }
+        }
+        
+        /* Efectos especiales para cada personaje */
+        .character-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        .character-effect.active {
+            opacity: 1;
+        }
+        
+        /* Efectos específicos por personaje */
+        .ballerina-effect {
+            background: radial-gradient(circle at center, rgba(255, 105, 180, 0.1) 0%, transparent 70%);
+        }
+        
+        .ninja-effect {
+            background: radial-gradient(circle at center, rgba(139, 69, 19, 0.1) 0%, transparent 70%);
+        }
+        
+        .shark-effect {
+            background: radial-gradient(circle at center, rgba(30, 144, 255, 0.1) 0%, transparent 70%);
+        }
+        
+        .tralalero-effect {
+            background: radial-gradient(circle at center, rgba(255, 99, 71, 0.1) 0%, transparent 70%);
+        }
+        
+        .sahur-effect {
+            background: radial-gradient(circle at center, rgba(147, 112, 219, 0.1) 0%, transparent 70%);
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .title {
+                font-size: 3rem;
+            }
+            
+            .character-name {
+                font-size: 2.5rem;
+            }
+            
+            .character-description {
+                font-size: 1.1rem;
+            }
+            
+            .character-image-container {
+                width: 320px;
+                height: 320px;
+            }
+            
+            .nav-button {
+                width: 70px;
+                height: 70px;
+            }
+            
+            .nav-arrow {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-decoration decoration-1">🌟</div>
+    <div class="floating-decoration decoration-2">📚</div>
+    <div class="floating-decoration decoration-3">🎨</div>
+    <div class="floating-decoration decoration-4">🎵</div>
+    <div class="floating-decoration decoration-5">🚀</div>
+    
+    <div class="selection-container">
+        <div class="character-counter">
+            <span id="currentIndex">1</span> / <span id="totalCount">5</span>
+        </div>
+        
+        <h1 class="title">¡Elige tu Compañero!</h1>
+        <p class="subtitle">Mundo de Aprendizaje para 1º a 5º de Primaria</p>
+        
+        <div class="character-display">
+            <div class="navigation-arrows">
+                <div class="nav-button" onclick="previousCharacter()">
+                    <span class="nav-arrow">‹</span>
+                </div>
+                <div class="nav-button" onclick="nextCharacter()">
+                    <span class="nav-arrow">›</span>
+                </div>
+            </div>
+            
+            <div class="character-image-container">
+                <div class="character-effect" id="characterEffect"></div>
+                <img id="characterImage" class="character-image" src="" alt="">
+            </div>
+            
+            <div class="character-info">
+                <h2 id="characterName" class="character-name"></h2>
+                <p id="characterDescription" class="character-description"></p>
+                <p id="characterPower" class="character-power"></p>
+            </div>
+        </div>
+        
+        <div class="bottom-controls">
+            <div class="control-hint">
+                <div class="control-icon">←→</div>
+                <span class="control-text">Navegar</span>
+            </div>
+            
+            <button class="select-button" onclick="selectCharacter()">
+                ¡Seleccionar y Continuar!
+            </button>
+            
+            <div class="control-hint">
+                <div class="control-icon select">✓</div>
+                <span class="control-text">Elegir</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const characters = [
+            {
+                name: "Tralalero Tralala",
+                image: "images/characters/Tralalero Tralala.png",
+                description: "El maestro de las canciones y rimas educativas. Convierte cualquier lección en una melodía pegadiza que nunca olvidarás.",
+                power: "Poder Especial: Melodía Educativa - Transforma las lecciones en canciones inolvidables",
+                alt: "Tralalero Tralala - Un personaje musical educativo de color naranja que enseña a través de canciones",
+                effect: "tralalero-effect"
+            },
+            {
+                name: "Ballerina Cappuccina",
+                image: "images/characters/Ballerina Cappuccina.png",
+                description: "¡Una elegante bailarina que ama el café y las matemáticas! Baila mientras resuelve problemas y enseña con gracia y estilo.",
+                power: "Poder Especial: Danza Matemática - Convierte los números en hermosos pasos de baile",
+                alt: "Ballerina Cappuccina - Una taza de café bailarina con tutú rosa que enseña matemáticas bailando",
+                effect: "ballerina-effect"
+            },
+            {
+                name: "Cappuccino Assassino",
+                image: "images/characters/Cappuccino Assassino.png",
+                description: "Un ninja del conocimiento que elimina la ignorancia con su espada de sabiduría. ¡Protege a los estudiantes de las respuestas incorrectas!",
+                power: "Poder Especial: Golpe de Conocimiento - Derrota a la confusión con datos precisos",
+                alt: "Cappuccino Assassino - Un ninja café con máscara y katanas que combate la ignorancia",
+                effect: "ninja-effect"
+            },
+            {
+                name: "Bombardino Crocodilo",
+                image: "images/characters/Bombardino Crocodilo.png",
+                description: "Un tiburón aventurero que ama las bebidas calientes y explorar nuevos temas. ¡Siempre está listo para una nueva aventura educativa!",
+                power: "Poder Especial: Mordida de Sabiduría - Devora los problemas difíciles de un bocado",
+                alt: "Bombardino Crocodilo - Un tiburón azul con zapatillas deportivas listo para aventuras educativas",
+                effect: "shark-effect"
+            },
+            {
+                name: "Tung Tung Sahur",
+                image: "images/characters/Tung Tung Sahur.png",
+                description: "Un personaje mágico y misterioso que despierta la curiosidad. Con sus poderes especiales ayuda a los niños a descubrir secretos del aprendizaje.",
+                power: "Poder Especial: Despertar Mágico - Revela conocimientos ocultos y sorpresas educativas",
+                alt: "Tung Tung Sahur - Un personaje místico púrpura con poderes mágicos para el aprendizaje",
+                effect: "sahur-effect"
+            }
+        ];
+        
+        let currentCharacterIndex = 0;
+        let selectedCharacter = null;
+        
+        function updateDisplay() {
+            const character = characters[currentCharacterIndex];
+            const imageElement = document.getElementById('characterImage');
+            const effectElement = document.getElementById('characterEffect');
+            
+            console.log('Actualizando personaje:', character.name);
+            
+            // Remover efectos anteriores
+            effectElement.className = 'character-effect';
+            
+            // Actualizar imagen con transición suave
+            imageElement.style.opacity = '0';
+            
+            setTimeout(() => {
+                imageElement.src = character.image;
+                imageElement.alt = character.alt;
+                
+                // Actualizar información
+                document.getElementById('characterName').textContent = character.name;
+                document.getElementById('characterDescription').textContent = character.description;
+                document.getElementById('characterPower').textContent = character.power;
+                document.getElementById('currentIndex').textContent = currentCharacterIndex + 1;
+                document.getElementById('totalCount').textContent = characters.length;
+                
+                // Agregar efecto específico del personaje
+                effectElement.className = `character-effect ${character.effect} active`;
+                
+                // Mostrar imagen con fade in
+                imageElement.style.opacity = '1';
+                
+                console.log('Display actualizado exitosamente');
+            }, 200);
+        }
+        
+        function nextCharacter() {
+            currentCharacterIndex = (currentCharacterIndex + 1) % characters.length;
+            console.log('Siguiente personaje:', currentCharacterIndex);
+            updateDisplay();
+            
+            // Vibración suave en dispositivos móviles
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+        }
+        
+        function previousCharacter() {
+            currentCharacterIndex = (currentCharacterIndex - 1 + characters.length) % characters.length;
+            console.log('Personaje anterior:', currentCharacterIndex);
+            updateDisplay();
+            
+            // Vibración suave en dispositivos móviles
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+        }
+        
+        function selectCharacter() {
+            selectedCharacter = characters[currentCharacterIndex];
+            
+            const message = `¡Genial! Has elegido a ${selectedCharacter.name}!\n\n${selectedCharacter.description}\n\n${selectedCharacter.power}\n\n¡Prepárate para una aventura de aprendizaje increíble!`;
+            
+            // Vibración más fuerte para selección
+            if (navigator.vibrate) {
+                navigator.vibrate([100, 50, 100]);
+            }
+            
+            alert(message);
+            console.log('Personaje seleccionado:', selectedCharacter);
+            
+            // Aquí puedes agregar la lógica para continuar al siguiente paso del juego
+            // Por ejemplo: window.location.href = 'juego.html';
+        }
+        
+        // Controles de teclado mejorados
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case 'ArrowLeft':
+                case 'a':
+                case 'A':
+                    e.preventDefault();
+                    previousCharacter();
+                    break;
+                case 'ArrowRight':
+                case 'd':
+                case 'D':
+                    e.preventDefault();
+                    nextCharacter();
+                    break;
+                case 'Enter':
+                case ' ':
+                    e.preventDefault();
+                    selectCharacter();
+                    break;
+                case 'Escape':
+                    // Funcionalidad adicional - resetear a primer personaje
+                    currentCharacterIndex = 0;
+                    updateDisplay();
+                    break;
+            }
+        });
+        
+        // Soporte para gestos táctiles
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        document.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+        
+        document.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleGesture();
+        });
+        
+        function handleGesture() {
+            const swipeThreshold = 50;
+            const swipeDistance = touchEndX - touchStartX;
+            
+            if (Math.abs(swipeDistance) > swipeThreshold) {
+                if (swipeDistance > 0) {
+                    // Swipe derecha - personaje anterior
+                    previousCharacter();
+                } else {
+                    // Swipe izquierda - siguiente personaje
+                    nextCharacter();
+                }
+            }
+        }
+        
+        // Inicializar al cargar la página
+        window.addEventListener('load', function() {
+            console.log('Página cargada completamente, iniciando display...');
+            
+            // Precargar todas las imágenes para transiciones más suaves
+            characters.forEach(character => {
+                const img = new Image();
+                img.src = character.image;
+            });
+            
+            // Inicializar display
+            updateDisplay();
+            
+            // Mensaje de bienvenida después de un breve delay
+            setTimeout(() => {
+                console.log('Sistema de selección de personajes listo');
+            }, 1000);
+        });
+        
+        // Manejar cambios de tamaño de ventana
+        window.addEventListener('resize', function() {
+            // Reagrupar elementos si es necesario
+            console.log('Ventana redimensionada');
+        });
+    </script>
+</body>
+</html>
+
