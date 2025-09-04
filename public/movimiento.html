@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mundo de Aprendizaje - Selección de Personaje 3D</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Import the component for model-viewer -->
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+</head>
+<body>
+    <!-- Floating Decorations (Background elements) -->
+    <div class="floating-decoration decoration-1">🌟</div>
+    <div class="floating-decoration decoration-2">📚</div>
+    <div class="floating-decoration decoration-3">🎨</div>
+    <div class="floating-decoration decoration-4">🎵</div>
+    <div class="floating-decoration decoration-5">🚀</div>
+    
+    <!-- Main Selection Container -->
+    <div class="selection-container">
+        <!-- Global Titles -->
+        <h1 class="title">¡Elige tu Compañero 3D!</h1>
+        <p class="subtitle">Mundo de Aprendizaje para 1º a 5º de Primaria</p>
+        
+        <!-- Character Counter -->
+        <div class="character-counter">
+            <span id="currentIndex">1</span> / <span id="totalCount">6</span>
+        </div>
+
+        <!-- Character Display Area (for the 3D Model - now full screen) -->
+        <div class="character-display">
+            <!-- Navigation Arrows -->
+            <div class="navigation-arrows">
+                <div class="nav-button" onclick="previousCharacter()">
+                    <span class="nav-arrow">‹</span>
+                </div>
+                <div class="nav-button" onclick="nextCharacter()">
+                    <span class="nav-arrow">›</span>
+                </div>
+            </div>
+            
+            <!-- Character Image/Model Container -->
+            <div class="character-image-container">
+                <div class="character-effect" id="characterEffect"></div>
+                <model-viewer 
+                    id="characterModel"
+                    class="character-model"
+                    src="" 
+                    alt="" 
+                    camera-controls             
+                    auto-rotate               
+                    rotation-per-second="10deg" 
+                    interaction-prompt-style="basic" 
+                    shadow-intensity="1"      
+                    ar                        
+                    environment-image="neutral" 
+                    exposure="1"              
+                    loading="eager"           
+                    touch-action="pan-y"
+                    autoplay                  <!-- Este atributo es clave para que la animación se reproduzca -->
+                ></model-viewer>
+            </div>
+        </div>
+        
+        <!-- Character Name (now at the bottom, clickable) -->
+        <h2 id="characterName" class="character-name" onclick="showDescriptionModal()"></h2>
+
+        <!-- Bottom Controls -->
+        <div class="bottom-controls">
+            <div class="control-hint">
+                <div class="control-icon">←→</div>
+                <span class="control-text">Navegar</span>
+            </div>
+            
+            <button class="select-button" onclick="selectCharacter()">
+                ¡Seleccionar y Continuar!
+            </button>
+            
+            <div class="control-hint">
+                <div class="control-icon select">✓</div>
+                <span class="control-text">Elegir</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Description Modal (Hidden by default) -->
+    <div id="descriptionModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="hideDescriptionModal()">&times;</span>
+            <h3 id="modalCharacterName" class="modal-character-name"></h3>
+            <p id="modalCharacterDescription" class="modal-character-description"></p>
+            <p id="modalCharacterPower" class="modal-character-power"></p>
+        </div>
+    </div>
+
+    <script>
+        const characters = [
+            {
+                name: "Tralalero Tralala",
+                // IMPORTANT: These paths are relative to your HTML file.
+                // Ensure your folder structure matches:
+                // tu_proyecto/images/3D/tralalero_tralala/scene.gltf
+                model: "images/3D/tralalero_tralala/scene.gltf",
+                description: "El maestro de las canciones y rimas educativas. Convierte cualquier lección en una melodía pegadiza que nunca olvidarás.",
+                power: "Poder Especial: Melodía Educativa - Transforma las lecciones en canciones inolvidables",
+                alt: "Tralalero Tralala - Un personaje musical educativo de color naranja que enseña a través de canciones",
+                effect: "tralalero-effect",
+                animation: "Dance" // <-- ¡Asegúrate de que esta animación exista en tu modelo!
+            },
+            {
+                name: "Ballerina Cappuccina",
+                model: "images/3D/balerina_capuchina/scene.gltf",
+                description: "¡Una elegante bailarina que ama el café y las matemáticas! Baila mientras resuelve problemas y enseña con gracia y estilo.",
+                power: "Poder Especial: Danza Matemática - Convierte los números en hermosos pasos de baile",
+                alt: "Ballerina Cappuccina - Una taza de café bailarina con tutú rosa que enseña matemáticas bailando",
+                effect: "ballerina-effect",
+                animation: "Spin" // <-- ¡Asegúrate de que esta animación exista en tu modelo!
+            },
+            {
+                name: "Cappuccino Assassino",
+                model: "images/3D/capuchino_assasino/scene.gltf",
+                description: "Un ninja del conocimiento que elimina la ignorancia con su espada de sabiduría. ¡Protege a los estudiantes de las respuestas incorrectas!",
+                power: "Poder Especial: Golpe de Conocimiento - Derrota a la confusión con datos precisos",
+                alt: "Cappuccino Assassino - Un ninja café con máscara y katanas que combate la ignorancia",
+                effect: "ninja-effect",
+                animation: "Idle" // <-- ¡Asegúrate de que esta animación exista en tu modelo!
+            },
+            {
+                name: "Bombardino Crocodilo",
+                model: "images/3D/bombardino_crocodilo/scene.gltf",
+                description: "Un tiburón aventurero que ama las bebidas calientes y explorar nuevos temas. ¡Siempre está listo para una nueva aventura educativa!",
+                power: "Poder Especial: Mordida de Sabiduría - Devora los problemas difíciles de un bocado",
+                alt: "Bombardino Crocodilo - Un tiburón azul con zapatillas deportivas listo para aventuras educativas",
+                effect: "shark-effect",
+                animation: "Swim" // <-- ¡Asegúrate de que esta animación exista en tu modelo!
+            },
+            {
+                name: "La Vaca Saturno Saturnito",
+                model: "images/3D/la_vaca_saturno_saturnito/scene.gltf",
+                description: "Una vaca cósmica que viaja por el espacio enseñando sobre el universo y la ciencia. ¡Su leche es pura sabiduría estelar!",
+                power: "Poder Especial: Gravedad del Conocimiento - Atrae y retiene la información más compleja",
+                alt: "La Vaca Saturno Saturnito - Una vaca con temática espacial que enseña sobre el universo",
+                effect: "cow-effect",
+                animation: "Float" // <-- ¡Asegúrate de que esta animación exista en tu modelo!
+            },
+            {
+                name: "Tung Tung Sahur",
+                model: "images/3D/tung_tung_sahur/scene.gltf",
+                description: "Un personaje mágico y misterioso que despierta la curiosidad. Con sus poderes especiales ayuda a los niños a descubrir secretos del aprendizaje.",
+                power: "Poder Especial: Despertar Mágico - Revela conocimientos ocultos y sorpresas educativas",
+                alt: "Tung Tung Sahur - Un personaje místico púrpura con poderes mágicos para el aprendizaje",
+                effect: "sahur-effect",
+                animation: "Magic" // <-- ¡Asegúrate de que esta animación exista en tu modelo!
+            }
+        ];
+        
+        let currentCharacterIndex = 0;
+        let selectedCharacter = null;
+        
+        function updateDisplay() {
+            const character = characters[currentCharacterIndex];
+            const modelElement = document.getElementById('characterModel');
+            const effectElement = document.getElementById('characterEffect');
+            
+            console.log('Actualizando personaje:', character.name);
+            
+            // Remover efectos anteriores
+            effectElement.className = 'character-effect';
+            
+            // Actualizar modelo 3D
+            modelElement.src = character.model;
+            modelElement.alt = character.alt;
+            
+            // *** APLICAR ANIMACIÓN ***
+            if (character.animation) {
+                modelElement.animationName = character.animation;
+                modelElement.autoplay = true; // Asegura que la animación se reproduzca automáticamente
+            } else {
+                // Si el personaje no tiene una animación específica, puedes detener cualquier animación
+                // o establecer una animación por defecto si existe (ej. "Idle")
+                modelElement.animationName = ''; // Detiene la animación actual
+                modelElement.autoplay = false;
+            }
+            
+            // Actualizar información del nombre (ahora en la parte inferior)
+            document.getElementById('characterName').textContent = character.name;
+            document.getElementById('currentIndex').textContent = currentCharacterIndex + 1;
+            document.getElementById('totalCount').textContent = characters.length;
+            
+            // Actualizar contenido del modal (para cuando se abra)
+            document.getElementById('modalCharacterName').textContent = character.name;
+            document.getElementById('modalCharacterDescription').textContent = character.description;
+            document.getElementById('modalCharacterPower').textContent = character.power;
+
+            // Agregar efecto específico del personaje
+            effectElement.className = `character-effect ${character.effect} active`;
+            
+            console.log('Display actualizado exitosamente');
+        }
+        
+        function nextCharacter() {
+            currentCharacterIndex = (currentCharacterIndex + 1) % characters.length;
+            console.log('Siguiente personaje:', currentCharacterIndex);
+            updateDisplay();
+            
+            // Vibración suave en dispositivos móviles
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+        }
+        
+        function previousCharacter() {
+            currentCharacterIndex = (currentCharacterIndex - 1 + characters.length) % characters.length;
+            console.log('Personaje anterior:', currentCharacterIndex);
+            updateDisplay();
+            
+            // Vibración suave en dispositivos móviles
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+        }
+        
+        function selectCharacter() {
+            selectedCharacter = characters[currentCharacterIndex];
+            
+            const message = `¡Genial! Has elegido a ${selectedCharacter.name}!\n\n${selectedCharacter.description}\n\n${selectedCharacter.power}\n\n¡Prepárate para una aventura de aprendizaje increíble!`;
+            
+            // Vibración más fuerte para selección
+            if (navigator.vibrate) {
+                navigator.vibrate([100, 50, 100]);
+            }
+            
+            alert(message);
+            console.log('Personaje seleccionado:', selectedCharacter);
+            
+            // Aquí puedes agregar la lógica para continuar al siguiente paso del juego
+            // Por ejemplo: window.location.href = 'juego.html';
+        }
+
+        // Modal functions
+        function showDescriptionModal() {
+            document.getElementById('descriptionModal').style.display = 'flex';
+            if (navigator.vibrate) {
+                navigator.vibrate(70); // Small vibration for modal open
+            }
+        }
+
+        function hideDescriptionModal() {
+            document.getElementById('descriptionModal').style.display = 'none';
+        }
+        
+        // Controles de teclado mejorados
+        document.addEventListener('keydown', (e) => {
+            // If modal is open, only allow escape to close it
+            if (document.getElementById('descriptionModal').style.display === 'flex') {
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    hideDescriptionModal();
+                }
+                return; // Prevent other key actions while modal is open
+            }
+
+            switch(e.key) {
+                case 'ArrowLeft':
+                case 'a':
+                case 'A':
+                    e.preventDefault();
+                    previousCharacter();
+                    break;
+                case 'ArrowRight':
+                case 'd':
+                case 'D':
+                    e.preventDefault();
+                    nextCharacter();
+                    break;
+                case 'Enter':
+                case ' ':
+                    e.preventDefault();
+                    selectCharacter();
+                    break;
+                case 'Escape':
+                    // Funcionalidad adicional - resetear a primer personaje
+                    currentCharacterIndex = 0;
+                    updateDisplay();
+                    break;
+            }
+        });
+        
+        // Soporte para gestos táctiles
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        document.addEventListener('touchstart', e => {
+            // Prevent swipe if modal is open
+            if (document.getElementById('descriptionModal').style.display === 'flex') return;
+            touchStartX = e.changedTouches[0].screenX;
+        });
+        
+        document.addEventListener('touchend', e => {
+            // Prevent swipe if modal is open
+            if (document.getElementById('descriptionModal').style.display === 'flex') return;
+            touchEndX = e.changedTouches[0].screenX;
+            handleGesture();
+        });
+        
+        function handleGesture() {
+            const swipeThreshold = 50;
+            const swipeDistance = touchEndX - touchStartX;
+            
+            if (Math.abs(swipeDistance) > swipeThreshold) {
+                if (swipeDistance > 0) {
+                    // Swipe derecha - personaje anterior
+                    previousCharacter();
+                } else {
+                    // Swipe izquierda - siguiente personaje
+                    nextCharacter();
+                }
+            }
+        }
+        
+        // Inicializar al cargar la página
+        window.addEventListener('load', function() {
+            console.log('Página cargada completamente, iniciando display...');
+            
+            // Inicializar display
+            updateDisplay();
+            
+            // Mensaje de bienvenida después de un breve delay
+            setTimeout(() => {
+                console.log('Sistema de selección de personajes 3D listo');
+            }, 1000);
+        });
+        
+        // Manejar cambios de tamaño de ventana
+        window.addEventListener('resize', function() {
+            console.log('Ventana redimensionada');
+        });
+    </script>
+</body>
+</html>

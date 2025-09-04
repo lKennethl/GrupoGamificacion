@@ -1,0 +1,11 @@
+Model Information:
+* title:	Bombardino Crocodilo
+* source:	https://sketchfab.com/3d-models/bombardino-crocodilo-bd56dc49d21143d5832856f1e1fd9b78
+* author:	That one larry (https://sketchfab.com/Professor_E12)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Bombardino Crocodilo" (https://sketchfab.com/3d-models/bombardino-crocodilo-bd56dc49d21143d5832856f1e1fd9b78) by That one larry (https://sketchfab.com/Professor_E12) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

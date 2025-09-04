@@ -1,0 +1,3522 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Adventure World</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #4CAF50;
+            --secondary: #2196F3;
+            --accent: #FF9800;
+            --danger: #F44336;
+            --success: #8BC34A;
+            --warning: #FFC107;
+            --gold: #FFD700;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+            user-select: none;
+        }
+
+        /* ===== BOTÓN DE REGRESO ===== */
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: linear-gradient(45deg, #FF6B6B, #EE5A24);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 400;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.4);
+        }
+
+        /* ===== MUNDO 3D ===== */
+        .game-world {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            perspective: 1200px;
+            overflow: hidden;
+        }
+
+        .world-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 1200px;
+            height: 800px;
+            transform: translate(-50%, -50%) rotateX(45deg) rotateY(0deg);
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease;
+        }
+
+        .ground {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(76, 175, 80, 0.4) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(33, 150, 243, 0.4) 0%, transparent 40%),
+                linear-gradient(45deg, #4CAF50 0%, #8BC34A 50%, #CDDC39 100%);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            transform: translateZ(-10px);
+        }
+
+        /* ===== PERSONAJE ===== */
+        .player {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, #FFD54F, #FFA726);
+            border-radius: 50%;
+            border: 4px solid #FF8F00;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            z-index: 100;
+            transition: transform 0.2s ease;
+            filter: drop-shadow(0 8px 16px rgba(0,0,0,0.4));
+            transform: translateZ(20px);
+        }
+
+        .player::before {
+            content: '😊';
+            animation: playerBob 2s ease-in-out infinite;
+        }
+
+        .player.walking::before {
+            animation: playerWalk 0.4s ease-in-out infinite;
+        }
+
+        /* ===== ZONAS DE APRENDIZAJE ===== */
+        .learning-zone {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            transform: translateZ(15px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 4px solid rgba(255,255,255,0.3);
+        }
+
+        .learning-zone:hover {
+            transform: translateZ(25px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+        }
+
+        .learning-zone.active {
+            animation: zonePulse 1s ease-in-out infinite;
+            border-color: var(--gold);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+        }
+
+        .zone-vocabulary {
+            background: linear-gradient(45deg, #E91E63, #AD1457);
+            top: 150px;
+            left: 200px;
+        }
+
+        .zone-grammar {
+            background: linear-gradient(45deg, #2196F3, #1565C0);
+            top: 150px;
+            right: 200px;
+        }
+
+        .zone-listening {
+            background: linear-gradient(45deg, #FF9800, #E65100);
+            bottom: 200px;
+            left: 200px;
+        }
+
+        .zone-speaking {
+            background: linear-gradient(45deg, #9C27B0, #6A1B9A);
+            bottom: 200px;
+            right: 200px;
+        }
+
+        .zone-reading {
+            background: linear-gradient(45deg, #4CAF50, #2E7D32);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) translateZ(15px);
+        }
+
+        .zone-label {
+            font-size: 0.8rem;
+            margin-top: 5px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* ===== INDICADOR DE INTERACCIÓN ===== */
+        .interaction-hint {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 200;
+        }
+
+        .learning-zone.near .interaction-hint {
+            opacity: 1;
+            animation: hintBounce 1s ease-in-out infinite;
+        }
+
+        /* ===== HUD MEJORADO ===== */
+        .hud {
+            position: fixed;
+            top: 80px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            z-index: 300;
+            pointer-events: none;
+        }
+
+        .hud > * {
+            pointer-events: all;
+        }
+
+        .hud-left, .hud-right {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .hud-item {
+            background: rgba(255,255,255,0.95);
+            padding: 12px 20px;
+            border-radius: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .hud-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+        }
+
+        .score-display {
+            background: linear-gradient(45deg, #4CAF50, #2E7D32);
+            color: white;
+        }
+
+        .level-display {
+            background: linear-gradient(45deg, #2196F3, #1565C0);
+            color: white;
+        }
+
+        .coins-display {
+            background: linear-gradient(45deg, var(--gold), #FFA000);
+            color: white;
+            animation: coinShine 3s infinite;
+        }
+
+        .streak-display {
+            background: linear-gradient(45deg, #9C27B0, #6A1B9A);
+            color: white;
+        }
+
+        .progress-display {
+            background: linear-gradient(45deg, #FF9800, #E65100);
+            color: white;
+            min-width: 200px;
+        }
+
+        .mini-progress-bar {
+            width: 100px;
+            height: 6px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-left: 10px;
+        }
+
+        .mini-progress-fill {
+            height: 100%;
+            background: white;
+            transition: width 0.5s ease;
+            border-radius: 3px;
+        }
+
+        /* ===== MODAL DE JUEGO MEJORADO ===== */
+        .game-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 500;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .game-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 900px;
+            width: 95%;
+            max-height: 85%;
+            overflow-y: auto;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+            animation: modalSlideIn 0.4s ease;
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .modal-title {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .modal-subtitle {
+            color: #666;
+            font-size: 1.2rem;
+        }
+
+        .question-counter {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: linear-gradient(45deg, #4CAF50, #2E7D32);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        /* ===== JUEGOS INTERACTIVOS MEJORADOS ===== */
+        .game-container {
+            margin: 20px 0;
+        }
+
+        .question-text {
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            border-left: 5px solid var(--primary);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 15px 15px 0;
+            font-size: 1.3rem;
+            font-weight: 500;
+        }
+
+        .word-card {
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            border: 3px solid #dee2e6;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-block;
+            min-width: 150px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .word-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .word-card:hover::before {
+            left: 100%;
+        }
+
+        .word-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            border-color: var(--primary);
+        }
+
+        .word-card.selected {
+            background: linear-gradient(45deg, #4CAF50, #8BC34A);
+            color: white;
+            border-color: #2E7D32;
+            transform: translateY(-3px) scale(1.02);
+        }
+
+        .word-card.correct {
+            background: linear-gradient(45deg, #4CAF50, #8BC34A);
+            color: white;
+            animation: correctPulse 0.6s ease;
+        }
+
+        .word-card.incorrect {
+            background: linear-gradient(45deg, #F44336, #E53935);
+            color: white;
+            animation: incorrectShake 0.6s ease;
+        }
+
+        .word-card.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ===== TIPOS DE EJERCICIOS ESPECÍFICOS ===== */
+        .vocabulary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .sentence-builder {
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            border: 3px dashed #dee2e6;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            min-height: 80px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .sentence-builder.has-words {
+            border-color: var(--primary);
+            background: linear-gradient(45deg, rgba(76, 175, 80, 0.1), rgba(139, 195, 74, 0.1));
+        }
+
+                .sentence-word {
+            background: linear-gradient(45deg, #4CAF50, #8BC34A);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            margin: 3px;
+            display: inline-block;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .sentence-word:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .listening-player {
+            background: linear-gradient(45deg, #FF9800, #F57C00);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            margin: 20px 0;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .speaking-recorder {
+            background: linear-gradient(45deg, #9C27B0, #6A1B9A);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            margin: 20px 0;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .reading-passage {
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            border-left: 5px solid var(--primary);
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 0 15px 15px 0;
+            line-height: 1.8;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .spell-input {
+            font-size: 1.8rem;
+            padding: 15px 25px;
+            border: 3px solid #ddd;
+            border-radius: 15px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            background: linear-gradient(45deg, #fff, #f8f9fa);
+        }
+
+        .spell-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.3);
+        }
+
+        /* ===== CONTROLES MEJORADOS ===== */
+        .game-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #4CAF50, #8BC34A);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #6c757d, #495057);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #F44336, #E53935);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(45deg, #FF9800, #F57C00);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ===== CONTROLES MÓVILES ===== */
+        .mobile-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            display: none;
+            justify-content: space-between;
+            align-items: end;
+            z-index: 300;
+        }
+
+        .joystick {
+            width: 120px;
+            height: 120px;
+            background: rgba(255,255,255,0.2);
+            border: 3px solid rgba(255,255,255,0.4);
+            border-radius: 50%;
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+
+        .joystick-knob {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.1s ease;
+        }
+
+        .action-btn {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(45deg, #FF9800, #F57C00);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        /* ===== PROGRESO Y ESTADÍSTICAS ===== */
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #e0e0e0;
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 20px 0;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #4CAF50, #8BC34A);
+            transition: width 0.5s ease;
+            border-radius: 6px;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: progressShine 2s infinite;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-item {
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid #dee2e6;
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        /* ===== NOTIFICACIONES Y EFECTOS ===== */
+        .score-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(45deg, #4CAF50, #8BC34A);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 20px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            z-index: 600;
+            animation: scorePopup 2s ease-out forwards;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .coin-popup {
+            position: fixed;
+            top: 30%;
+            right: 30px;
+            background: linear-gradient(45deg, var(--gold), #FFA000);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 20px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            z-index: 600;
+            animation: coinPopup 2s ease-out forwards;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .level-up-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(45deg, #9C27B0, #6A1B9A);
+            color: white;
+            padding: 30px 40px;
+            border-radius: 20px;
+            font-size: 2rem;
+            font-weight: bold;
+            z-index: 600;
+            animation: levelUpPopup 3s ease-out forwards;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+            text-align: center;
+        }
+
+        /* ===== ANIMACIONES ===== */
+        @keyframes playerBob {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+
+        @keyframes playerWalk {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-2px) scale(1.05); }
+        }
+
+        @keyframes zonePulse {
+            0%, 100% { transform: translateZ(15px) scale(1); }
+            50% { transform: translateZ(20px) scale(1.02); }
+        }
+
+        @keyframes hintBounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-5px); }
+        }
+
+        @keyframes modalSlideIn {
+            from { 
+                opacity: 0; 
+                transform: scale(0.8) translateY(-50px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: scale(1) translateY(0); 
+            }
+        }
+
+        @keyframes correctPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes incorrectShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @keyframes scoreIncrease {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes coinShine {
+            0%, 100% { box-shadow: 0 8px 25px rgba(0,0,0,0.2); }
+            50% { box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4); }
+        }
+
+        @keyframes scorePopup {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+            80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+        }
+
+        @keyframes coinPopup {
+            0% { opacity: 0; transform: translateX(100px); }
+            20% { opacity: 1; transform: translateX(0); }
+            80% { opacity: 1; transform: translateX(0); }
+            100% { opacity: 0; transform: translateX(-100px); }
+        }
+
+        @keyframes levelUpPopup {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.3) rotate(-10deg); }
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.2) rotate(5deg); }
+            40% { transform: translate(-50%, -50%) scale(0.9) rotate(-2deg); }
+            60% { transform: translate(-50%, -50%) scale(1.05) rotate(1deg); }
+            80% { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8) rotate(0deg); }
+        }
+
+        @keyframes progressShine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* ===== EFECTOS ESPECIALES ===== */
+        .particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: var(--gold);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 400;
+            animation: particleFloat 2s ease-out forwards;
+        }
+
+        @keyframes particleFloat {
+            0% { 
+                opacity: 1; 
+                transform: translateY(0) scale(1); 
+            }
+            100% { 
+                opacity: 0; 
+                transform: translateY(-100px) scale(0.3); 
+            }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .mobile-controls {
+                display: flex;
+            }
+
+            .world-container {
+                width: 100%;
+                height: 100%;
+                transform: translate(-50%, -50%) rotateX(35deg) rotateY(0deg);
+            }
+
+            .learning-zone {
+                width: 100px;
+                height: 100px;
+                font-size: 2.5rem;
+            }
+
+            .modal-content {
+                padding: 20px;
+                margin: 10px;
+            }
+
+            .hud {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .hud-left, .hud-right {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+
+            .back-button {
+                position: relative;
+                margin-bottom: 10px;
+            }
+
+            .vocabulary-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 10px;
+            }
+
+            .game-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+        <!-- Botón de Regreso -->
+    <button class="back-button" onclick="goToMainMenu()">
+        🏠 Menú Principal
+    </button>
+
+    <!-- HUD Mejorado -->
+    <div class="hud">
+        <div class="hud-left">
+            <div class="hud-item level-display">
+                <span>🎓</span>
+                <span>Nivel <span id="playerLevel">1</span></span>
+            </div>
+            <div class="hud-item score-display">
+                <span>⭐</span>
+                <span id="playerScore">0</span> puntos
+            </div>
+            <div class="hud-item coins-display">
+                <span>🪙</span>
+                <span id="playerCoins">0</span> monedas
+            </div>
+        </div>
+        <div class="hud-right">
+            <div class="hud-item streak-display">
+                <span>🔥</span>
+                <span id="playerStreak">0</span> racha
+            </div>
+            <div class="hud-item progress-display">
+                <span>📊</span>
+                <span>Progreso</span>
+                <div class="mini-progress-bar">
+                    <div class="mini-progress-fill" id="miniProgressFill" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mundo 3D -->
+    <div class="game-world">
+        <div class="world-container" id="worldContainer">
+            <div class="ground"></div>
+            
+            <!-- Personaje -->
+            <div class="player" id="player"></div>
+            
+            <!-- Zonas de Aprendizaje -->
+            <div class="learning-zone zone-vocabulary" data-zone="vocabulary">
+                📚
+                <div class="zone-label">Vocabulary</div>
+                <div class="interaction-hint">Presiona ESPACIO para entrar</div>
+            </div>
+            
+            <div class="learning-zone zone-grammar" data-zone="grammar">
+                📝
+                <div class="zone-label">Grammar</div>
+                <div class="interaction-hint">Presiona ESPACIO para entrar</div>
+            </div>
+            
+            <div class="learning-zone zone-listening" data-zone="listening">
+                🎧
+                <div class="zone-label">Listening</div>
+                <div class="interaction-hint">Presiona ESPACIO para entrar</div>
+            </div>
+            
+            <div class="learning-zone zone-speaking" data-zone="speaking">
+                🎤
+                <div class="zone-label">Speaking</div>
+                <div class="interaction-hint">Presiona ESPACIO para entrar</div>
+            </div>
+            
+            <div class="learning-zone zone-reading" data-zone="reading">
+                📖
+                <div class="zone-label">Reading</div>
+                <div class="interaction-hint">Presiona ESPACIO para entrar</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Controles Móviles -->
+    <div class="mobile-controls">
+        <div class="joystick" id="joystick">
+            <div class="joystick-knob" id="joystickKnob"></div>
+        </div>
+        <button class="action-btn" id="actionBtn">⚡</button>
+    </div>
+
+    <!-- Modal de Juego Mejorado -->
+    <div class="game-modal" id="gameModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="question-counter" id="questionCounter">1/10</div>
+                <h2 class="modal-title" id="modalTitle">Zona de Aprendizaje</h2>
+                <p class="modal-subtitle" id="modalSubtitle">Descripción del juego</p>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            
+            <div id="gameContent">
+                <!-- Contenido dinámico del juego -->
+            </div>
+            
+            <div class="stats-container" id="gameStats" style="display: none;">
+                <div class="stat-item">
+                    <div class="stat-value" id="correctAnswers">0</div>
+                    <div class="stat-label">Correctas</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="incorrectAnswers">0</div>
+                    <div class="stat-label">Incorrectas</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="currentStreak">0</div>
+                    <div class="stat-label">Racha Actual</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="coinsEarned">0</div>
+                    <div class="stat-label">Monedas Ganadas</div>
+                </div>
+            </div>
+            
+            <div class="game-controls">
+                <button class="btn btn-secondary" onclick="closeGame()">🚪 Salir</button>
+                <button class="btn btn-warning" onclick="showHint()" id="hintBtn">💡 Pista</button>
+                <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" disabled>➡️ Siguiente</button>
+                <button class="btn btn-danger" id="resetBtn" onclick="resetGame()">🔄 Reiniciar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== VARIABLES GLOBALES =====
+        let gameState = {
+            playerPosition: { x: 600, y: 400 },
+            playerDirection: 0,
+            isMoving: false,
+            currentZone: null,
+            nearZone: null,
+            score: 0,
+            coins: 0,
+            level: 1,
+            streak: 0,
+            currentGame: null,
+            gameProgress: 0,
+            sessionStats: {
+                correct: 0,
+                incorrect: 0,
+                coinsEarned: 0,
+                questionsAnswered: 0
+            }
+        };
+
+        let inputState = {
+            keys: {},
+            joystickActive: false
+        };
+
+        // ===== DATOS EXPANDIDOS DE LOS JUEGOS =====
+        const gameData = {
+            vocabulary: {
+                title: "🔤 Vocabulary Master",
+                subtitle: "Aprende nuevas palabras en inglés",
+                exercises: [
+                    // Nivel Básico - Objetos Cotidianos
+                    {
+                        type: "match",
+                        question: "Conecta las palabras con sus significados",
+                        difficulty: "easy",
+                        pairs: [
+                            { english: "Apple", spanish: "Manzana", image: "🍎" },
+                            { english: "Book", spanish: "Libro", image: "📚" },
+                            { english: "Car", spanish: "Coche", image: "🚗" },
+                            { english: "House", spanish: "Casa", image: "🏠" }
+                        ]
+                    },
+                    {
+                        type: "select",
+                        question: "¿Cuál es la traducción correcta de 'Water'?",
+                        options: ["Agua", "Fuego", "Tierra", "Aire"],
+                        correct: 0,
+                        image: "💧",
+                        difficulty: "easy"
+                    },
+                    {
+                        type: "spell",
+                        question: "Escribe la palabra en inglés para:",
+                        word: "COMPUTER",
+                        hint: "Dispositivo electrónico para trabajar",
+                        image: "💻",
+                        difficulty: "medium"
+                    },
+                    // Colores
+                    {
+                        type: "match",
+                        question: "Conecta los colores con sus nombres",
+                        difficulty: "easy",
+                        pairs: [
+                            { english: "Red", spanish: "Rojo", image: "🔴" },
+                            { english: "Blue", spanish: "Azul", image: "🔵" },
+                            { english: "Green", spanish: "Verde", image: "🟢" },
+                            { english: "Yellow", spanish: "Amarillo", image: "🟡" }
+                        ]
+                    },
+                    {
+                        type: "select",
+                        question: "¿De qué color es el sol?",
+                        options: ["Yellow", "Blue", "Red", "Green"],
+                        correct: 0,
+                        image: "☀️",
+                        difficulty: "easy"
+                    },
+                    // Animales
+                    {
+                        type: "match",
+                        question: "Conecta los animales con sus nombres",
+                        difficulty: "easy",
+                        pairs: [
+                            { english: "Cat", spanish: "Gato", image: "🐱" },
+                            { english: "Dog", spanish: "Perro", image: "🐶" },
+                            { english: "Bird", spanish: "Pájaro", image: "🐦" },
+                            { english: "Fish", spanish: "Pez", image: "🐟" }
+                        ]
+                    },
+                    {
+                        type: "spell",
+                        question: "Escribe el animal que ves:",
+                        word: "ELEPHANT",
+                        hint: "Animal grande con trompa",
+                        image: "🐘",
+                        difficulty: "medium"
+                    },
+                    // Comida
+                    {
+                        type: "match",
+                        question: "Conecta las comidas con sus nombres",
+                        difficulty: "easy",
+                        pairs: [
+                            { english: "Pizza", spanish: "Pizza", image: "🍕" },
+                            { english: "Bread", spanish: "Pan", image: "🍞" },
+                            { english: "Milk", spanish: "Leche", image: "🥛" },
+                            { english: "Egg", spanish: "Huevo", image: "🥚" }
+                        ]
+                    },
+                    {
+                        type: "select",
+                        question: "¿Qué bebes cuando tienes sed?",
+                        options: ["Water", "Book", "Chair", "Car"],
+                        correct: 0,
+                        image: "💧",
+                        difficulty: "easy"
+                    },
+                    // Familia
+                    {
+                        type: "match",
+                        question: "Conecta los miembros de la familia",
+                        difficulty: "medium",
+                        pairs: [
+                            { english: "Mother", spanish: "Madre", image: "👩" },
+                            { english: "Father", spanish: "Padre", image: "👨" },
+                            { english: "Sister", spanish: "Hermana", image: "👧" },
+                            { english: "Brother", spanish: "Hermano", image: "👦" }
+                        ]
+                    },
+                    // Números
+                    {
+                        type: "select",
+                        question: "¿Cómo se dice 'cinco' en inglés?",
+                        options: ["Five", "Four", "Six", "Seven"],
+                        correct: 0,
+                        image: "✋",
+                        difficulty: "easy"
+                    },
+                    {
+                        type: "spell",
+                        question: "Escribe el número:",
+                        word: "TWENTY",
+                        hint: "Dos veces diez",
+                        image: "2️⃣0️⃣",
+                        difficulty: "medium"
+                    },
+                    // Ropa
+                    {
+                        type: "match",
+                        question: "Conecta la ropa con sus nombres",
+                        difficulty: "medium",
+                        pairs: [
+                            { english: "Shirt", spanish: "Camisa", image: "👔" },
+                            { english: "Shoes", spanish: "Zapatos", image: "👞" },
+                            { english: "Hat", spanish: "Sombrero", image: "👒" },
+                            { english: "Pants", spanish: "Pantalones", image: "👖" }
+                        ]
+                    },
+                    // Tiempo
+                    {
+                        type: "select",
+                        question: "¿Qué tiempo hace cuando llueve?",
+                        options: ["Rainy", "Sunny", "Hot", "Cold"],
+                        correct: 0,
+                        image: "🌧️",
+                        difficulty: "medium"
+                    },
+                    // Profesiones
+                    {
+                        type: "match",
+                        question: "Conecta las profesiones",
+                        difficulty: "hard",
+                        pairs: [
+                            { english: "Teacher", spanish: "Profesor", image: "👨‍🏫" },
+                            { english: "Doctor", spanish: "Doctor", image: "👨‍⚕️" },
+                            { english: "Police", spanish: "Policía", image: "👮" },
+                            { english: "Chef", spanish: "Cocinero", image: "👨‍🍳" }
+                        ]
+                    }
+                ]
+            },
+            grammar: {
+                title: "📝 Grammar Builder",
+                subtitle: "Construye oraciones perfectas",
+                exercises: [
+                    // Verbo TO BE
+                    {
+                        type: "sentence",
+                        question: "Ordena las palabras para formar una oración correcta:",
+                        words: ["I", "am", "a", "student"],
+                        correct: "I am a student",
+                        difficulty: "easy"
+                    },
+                    {
+                        type: "fill",
+                        question: "Completa la oración con la forma correcta del verbo 'to be':",
+                        sentence: "She ___ a teacher.",
+                        options: ["am", "is", "are", "be"],
+                        correct: 1,
+                        difficulty: "easy"
+                    },
+                    {
+                        type: "sentence",
+                        question: "Forma una pregunta con estas palabras:",
+                        words: ["Are", "you", "happy", "?"],
+                        correct: "Are you happy?",
+                        difficulty: "medium"
+                    },
+                    // Presente Simple
+                    {
+                        type: "fill",
+                        question: "Completa con la forma correcta del verbo:",
+                        sentence: "He ___ to school every day.",
+                        options: ["go", "goes", "going", "gone"],
+                        correct: 1,
+                        difficulty: "medium"
+                    },
+                    {
+                        type: "sentence",
+                        question: "Ordena para formar una oración negativa:",
+                        words: ["I", "do", "not", "like", "coffee"],
+                        correct: "I do not like coffee",
+                        difficulty: "medium"
+                    },
+                    // Artículos
+                    {
+                        type: "fill",
+                        question: "Elige el artículo correcto:",
+                        sentence: "___ apple is red.",
+                        options: ["A", "An", "The", "Some"],
+                        correct: 1,
+                        difficulty: "easy"
+                    },
+                    {
+                        type: "fill",
+                        question: "Completa con el artículo apropiado:",
+                        sentence: "I have ___ car.",
+                        options: ["a", "an", "the", "some"],
+                        correct: 0,
+                        difficulty: "easy"
+                    },
+                    // Plurales
+                    {
+                        type: "fill",
+                                                question: "¿Cuál es el plural de 'child'?",
+                        sentence: "There are many ___ in the park.",
+                        options: ["childs", "children", "childrens", "child"],
+                        correct: 1,
+                        difficulty: "medium"
+                    },
+                    // Preposiciones
+                    {
+                        type: "fill",
+                        question: "Elige la preposición correcta:",
+                        sentence: "The book is ___ the table.",
+                        options: ["in", "on", "at", "under"],
+                        correct: 1,
+                        difficulty: "medium"
+                    },
+                    {
+                        type: "sentence",
+                        question: "Ordena la oración con preposición de lugar:",
+                        words: ["The", "cat", "is", "under", "the", "bed"],
+                        correct: "The cat is under the bed",
+                        difficulty: "medium"
+                    },
+                    // Pasado Simple
+                    {
+                        type: "fill",
+                        question: "Completa con el pasado del verbo 'go':",
+                        sentence: "Yesterday I ___ to the store.",
+                        options: ["go", "goes", "went", "going"],
+                        correct: 2,
+                        difficulty: "hard"
+                    },
+                    {
+                        type: "sentence",
+                        question: "Forma una oración en pasado:",
+                        words: ["She", "played", "soccer", "yesterday"],
+                        correct: "She played soccer yesterday",
+                        difficulty: "hard"
+                    },
+                    // Futuro
+                    {
+                        type: "fill",
+                        question: "Completa la oración en futuro:",
+                        sentence: "Tomorrow I ___ visit my grandmother.",
+                        options: ["will", "would", "was", "were"],
+                        correct: 0,
+                        difficulty: "hard"
+                    },
+                    // Comparativos
+                    {
+                        type: "fill",
+                        question: "Completa con el comparativo correcto:",
+                        sentence: "This book is ___ than that one.",
+                        options: ["good", "better", "best", "more good"],
+                        correct: 1,
+                        difficulty: "hard"
+                    },
+                    // Pronombres
+                    {
+                        type: "fill",
+                        question: "Elige el pronombre correcto:",
+                        sentence: "___ is my friend.",
+                        options: ["He", "Him", "His", "Her"],
+                        correct: 0,
+                        difficulty: "medium"
+                    }
+                ]
+            },
+            listening: {
+                title: "🎧 Listening Challenge",
+                subtitle: "Entrena tu oído con el inglés",
+                exercises: [
+                    // Saludos básicos
+                    {
+                        type: "audio",
+                        question: "Escucha y selecciona lo que oyes:",
+                        audio: "Hello, how are you?",
+                        options: ["Hello, how are you?", "Hello, who are you?", "Hello, where are you?", "Hello, what are you?"],
+                        correct: 0,
+                        difficulty: "easy"
+                    },
+                    {
+                        type: "dictation",
+                        question: "Escucha y escribe lo que oyes:",
+                        audio: "Good morning",
+                        answer: "Good morning",
+                        difficulty: "easy"
+                    },
+                    // Presentaciones
+                    {
+                        type: "audio",
+                        question: "¿Qué escuchas?",
+                        audio: "My name is John",
+                        options: ["My name is John", "My name is Joan", "My game is John", "My name is Jon"],
+                        correct: 0,
+                        difficulty: "easy"
+                    },
+                    {
+                        type: "dictation",
+                        question: "Escribe la frase completa:",
+                        audio: "I am twenty years old",
+                        answer: "I am twenty years old",
+                        difficulty: "medium"
+                    },
+                    // Números
+                    {
+                        type: "audio",
+                        question: "¿Qué número escuchas?",
+                        audio: "Fifteen",
+                        options: ["Fifty", "Fifteen", "Fourteen", "Sixteen"],
+                        correct: 1,
+                        difficulty: "medium"
+                    },
+                    // Colores
+                    {
+                        type: "audio",
+                        question: "¿Qué color menciona?",
+                        audio: "The car is blue",
+                        options: ["Red", "Blue", "Green", "Yellow"],
+                        correct: 1,
+                        difficulty: "easy"
+                    },
+                    // Direcciones
+                    {
+                        type: "audio",
+                        question: "¿Qué dirección escuchas?",
+                        audio: "Turn left at the corner",
+                        options: ["Turn right", "Turn left", "Go straight", "Go back"],
+                        correct: 1,
+                        difficulty: "medium"
+                    },
+                    // Tiempo
+                    {
+                        type: "audio",
+                        question: "¿Qué hora es?",
+                        audio: "It's three o'clock",
+                        options: ["Two o'clock", "Three o'clock", "Four o'clock", "Five o'clock"],
+                        correct: 1,
+                        difficulty: "medium"
+                    },
+                    // Comida
+                    {
+                        type: "dictation",
+                        question: "Escribe lo que escuchas sobre comida:",
+                        audio: "I like pizza and hamburgers",
+                        answer: "I like pizza and hamburgers",
+                        difficulty: "medium"
+                    },
+                    // Familia
+                    {
+                        type: "audio",
+                        question: "¿Sobre quién habla?",
+                        audio: "This is my sister Mary",
+                        options: ["My mother Mary", "My sister Mary", "My brother Mary", "My friend Mary"],
+                        correct: 1,
+                        difficulty: "medium"
+                    },
+                    // Actividades
+                    {
+                        type: "dictation",
+                        question: "¿Qué actividad menciona?",
+                        audio: "I play soccer on weekends",
+                        answer: "I play soccer on weekends",
+                        difficulty: "hard"
+                    },
+                    // Descripciones
+                    {
+                        type: "audio",
+                        question: "¿Cómo describe a la persona?",
+                        audio: "She is tall and friendly",
+                        options: ["Short and friendly", "Tall and friendly", "Tall and funny", "Short and funny"],
+                        correct: 1,
+                        difficulty: "hard"
+                    },
+                    // Lugares
+                    {
+                        type: "audio",
+                        question: "¿A dónde va?",
+                        audio: "I'm going to the library",
+                        options: ["To the store", "To the library", "To the park", "To the school"],
+                        correct: 1,
+                        difficulty: "medium"
+                    },
+                    // Clima
+                    {
+                        type: "dictation",
+                        question: "¿Qué dice sobre el clima?",
+                        audio: "Today is sunny and warm",
+                        answer: "Today is sunny and warm",
+                        difficulty: "medium"
+                    },
+                    // Rutinas
+                    {
+                        type: "audio",
+                        question: "¿Qué hace por la mañana?",
+                        audio: "I brush my teeth every morning",
+                        options: ["Wash my face", "Brush my teeth", "Comb my hair", "Take a shower"],
+                        correct: 1,
+                        difficulty: "hard"
+                    }
+                ]
+            },
+            speaking: {
+                title: "🎤 Speaking Practice",
+                subtitle: "Practica tu pronunciación",
+                exercises: [
+                    // Saludos
+                    {
+                        type: "repeat",
+                        question: "Repite el saludo:",
+                        phrase: "Hello, nice to meet you",
+                        phonetic: "/həˈloʊ, naɪs tu mit ju/",
+                        difficulty: "easy"
+                    },
+                    {
+                        type: "repeat",
+                        question: "Practica esta despedida:",
+                        phrase: "Goodbye, see you later",
+                        phonetic: "/ɡʊdˈbaɪ, si ju ˈleɪtər/",
+                        difficulty: "easy"
+                    },
+                    // Presentación personal
+                    {
+                        type: "repeat",
+                        question: "Repite la presentación:",
+                        phrase: "My name is...",
+                        phonetic: "/maɪ neɪm ɪz/",
+                        difficulty: "easy"
+                    },
+                    {
+                        type: "describe",
+                        question: "Describe lo que ves:",
+                        image: "🏠",
+                        keywords: ["house", "home", "building"],
+                        difficulty: "medium"
+                    },
+                    // Números
+                    {
+                        type: "repeat",
+                        question: "Pronuncia estos números:",
+                        phrase: "One, two, three, four, five",
+                        phonetic: "/wʌn, tu, θri, fɔr, faɪv/",
+                        difficulty: "easy"
+                    },
+                    // Colores
+                    {
+                        type: "describe",
+                        question: "Di los colores que ves:",
+                        image: "🌈",
+                        keywords: ["red", "blue", "green", "yellow"],
+                        difficulty: "medium"
+                    },
+                    // Comida
+                    {
+                        type: "repeat",
+                        question: "Repite esta orden de comida:",
+                        phrase: "I would like a hamburger, please",
+                        phonetic: "/aɪ wʊd laɪk ə ˈhæmbərɡər, pliz/",
+                        difficulty: "medium"
+                    },
+                    // Direcciones
+                    {
+                        type: "repeat",
+                        question: "Practica dar direcciones:",
+                        phrase: "Go straight, then turn right",
+                        phonetic: "/ɡoʊ streɪt, ðen tərn raɪt/",
+                        difficulty: "hard"
+                    },
+                    // Tiempo
+                    {
+                        type: "repeat",
+                        question: "Di la hora:",
+                        phrase: "It's half past three",
+                        phonetic: "/ɪts hæf pæst θri/",
+                        difficulty: "medium"
+                    },
+                    // Emociones
+                    {
+                        type: "describe",
+                        question: "Expresa cómo te sientes:",
+                        image: "😊",
+                        keywords: ["happy", "glad", "cheerful"],
+                        difficulty: "medium"
+                    },
+                    // Actividades
+                    {
+                        type: "repeat",
+                        question: "Habla sobre tu hobby:",
+                        phrase: "I like to read books",
+                        phonetic: "/aɪ laɪk tu rid bʊks/",
+                        difficulty: "medium"
+                    },
+                    // Familia
+                    {
+                        type: "repeat",
+                        question: "Habla de tu familia:",
+                        phrase: "I have two brothers and one sister",
+                        phonetic: "/aɪ hæv tu ˈbrʌðərz ænd wʌn ˈsɪstər/",
+                        difficulty: "hard"
+                    },
+                    // Trabajo
+                    {
+                        type: "repeat",
+                        question: "Menciona tu profesión:",
+                        phrase: "I am a student",
+                        phonetic: "/aɪ æm ə ˈstudənt/",
+                        difficulty: "medium"
+                    },
+                    // Clima
+                    {
+                        type: "describe",
+                        question: "Describe el clima:",
+                        image: "☀️",
+                        keywords: ["sunny", "warm", "bright"],
+                        difficulty: "medium"
+                    },
+                    // Invitaciones
+                    {
+                        type: "repeat",
+                        question: "Haz una invitación:",
+                        phrase: "Would you like to come with me?",
+                        phonetic: "/wʊd ju laɪk tu kʌm wɪð mi/",
+                        difficulty: "hard"
+                    }
+                ]
+            },
+            reading: {
+                title: "📖 Reading Comprehension",
+                subtitle: "Mejora tu comprensión lectora",
+                exercises: [
+                    // Texto básico - Presentación
+                    {
+                        type: "passage",
+                        text: "Hi! My name is Sarah. I am 16 years old. I live in New York with my family. I have one brother and one sister. I like to read books and listen to music. My favorite color is blue.",
+                        questions: [
+                            {
+                                question: "How old is Sarah?",
+                                options: ["15", "16", "17", "18"],
+                                correct: 1
+                            },
+                            {
+                                question: "Where does Sarah live?",
+                                options: ["London", "Paris", "New York", "Tokyo"],
+                                correct: 2
+                            },
+                            {
+                                question: "What is Sarah's favorite color?",
+                                options: ["Red", "Green", "Blue", "Yellow"],
+                                correct: 2
+                            }
+                        ],
+                        difficulty: "easy"
+                    },
+                    // Texto sobre rutina diaria
+                    {
+                        type: "passage",
+                        text: "Every morning, Tom wakes up at 7:00 AM. He brushes his teeth and takes a shower. Then he eats breakfast with his family. At 8:30 AM, he goes to school by bus. School starts at 9:00 AM and ends at 3:00 PM.",
+                        questions: [
+                            {
+                                question: "What time does Tom wake up?",
+                                options: ["6:00 AM", "7:00 AM", "8:00 AM", "9:00 AM"],
+                                correct: 1
+                            },
+                            {
+                                question: "How does Tom go to school?",
+                                options: ["By car", "By bike", "By bus", "Walking"],
+                                correct: 2
+                            },
+                            {
+                                question: "When does school end?",
+                                options: ["2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM"],
+                                correct: 1
+                            }
+                        ],
+                        difficulty: "easy"
+                    },
+                    // Texto sobre mascotas
+                    {
+                        type: "passage",
+                        text: "Lisa has a pet dog named Max. Max is three years old and very friendly. He likes to play in the park and run with other dogs. Every day, Lisa takes Max for a walk in the morning and evening. Max's favorite food is chicken.",
+                        questions: [
+                            {
+                                question: "What is the dog's name?",
+                                options: ["Rex", "Max", "Buddy", "Charlie"],
+                                correct: 1
+                            },
+                            {
+                                question: "How often does Lisa walk Max?",
+                                options: ["Once a day", "Twice a day", "Three times a day", "Never"],
+                                correct: 1
+                            },
+                            {
+                                question: "What is Max's favorite food?",
+                                options: ["Beef", "Fish", "Chicken", "Vegetables"],
+                                correct: 2
+                            }
+                        ],
+                        difficulty: "medium"
+                    },
+                    // Texto sobre escuela
+                    {
+                        type: "passage",
+                                                text: "Green Valley School is a big school with 500 students. It has a library, a gym, and a cafeteria. The school day starts at 8:00 AM and ends at 3:30 PM. Students study math, science, English, and history. There are also art and music classes twice a week.",
+                        questions: [
+                            {
+                                question: "How many students are in the school?",
+                                options: ["400", "500", "600", "700"],
+                                correct: 1
+                            },
+                            {
+                                question: "What time does school start?",
+                                options: ["7:30 AM", "8:00 AM", "8:30 AM", "9:00 AM"],
+                                correct: 1
+                            },
+                            {
+                                question: "How often are art and music classes?",
+                                options: ["Once a week", "Twice a week", "Every day", "Once a month"],
+                                correct: 1
+                            }
+                        ],
+                        difficulty: "medium"
+                    },
+                    // Texto sobre vacaciones
+                    {
+                        type: "passage",
+                        text: "Last summer, the Johnson family went to the beach for vacation. They stayed in a hotel near the ocean for one week. Every day, they swam in the sea and built sandcastles. In the evenings, they walked on the beach and watched the sunset. It was the best vacation ever!",
+                        questions: [
+                            {
+                                question: "Where did the Johnson family go?",
+                                options: ["Mountains", "Beach", "City", "Forest"],
+                                correct: 1
+                            },
+                            {
+                                question: "How long did they stay?",
+                                options: ["Three days", "One week", "Two weeks", "One month"],
+                                correct: 1
+                            },
+                            {
+                                question: "What did they do in the evenings?",
+                                options: ["Swim", "Sleep", "Watch sunset", "Play games"],
+                                correct: 2
+                            }
+                        ],
+                        difficulty: "medium"
+                    },
+                    // Texto sobre comida
+                    {
+                        type: "passage",
+                        text: "Maria loves to cook. Her favorite dish to make is spaghetti with tomato sauce. She learned this recipe from her grandmother. First, she boils water in a big pot. Then she adds the spaghetti and cooks it for 10 minutes. While the pasta cooks, she prepares the sauce with tomatoes, garlic, and herbs.",
+                        questions: [
+                            {
+                                question: "What is Maria's favorite dish?",
+                                options: ["Pizza", "Spaghetti", "Salad", "Soup"],
+                                correct: 1
+                            },
+                            {
+                                question: "Who taught her the recipe?",
+                                options: ["Her mother", "Her grandmother", "Her friend", "A chef"],
+                                correct: 1
+                            },
+                            {
+                                question: "How long does she cook the spaghetti?",
+                                options: ["5 minutes", "10 minutes", "15 minutes", "20 minutes"],
+                                correct: 1
+                            }
+                        ],
+                        difficulty: "hard"
+                    },
+                    // Texto sobre deportes
+                    {
+                        type: "passage",
+                        text: "Soccer is the most popular sport in the world. It is played by two teams of eleven players each. The goal is to score by getting the ball into the opponent's goal. Players can use any part of their body except their hands and arms. Only the goalkeeper can touch the ball with hands, but only inside the penalty area.",
+                        questions: [
+                            {
+                                question: "How many players are on each team?",
+                                options: ["Nine", "Ten", "Eleven", "Twelve"],
+                                correct: 2
+                            },
+                            {
+                                question: "What body parts can't players use?",
+                                options: ["Feet", "Head", "Hands and arms", "Chest"],
+                                correct: 2
+                            },
+                            {
+                                question: "Who can touch the ball with hands?",
+                                options: ["Any player", "The captain", "The goalkeeper", "No one"],
+                                correct: 2
+                            }
+                        ],
+                        difficulty: "hard"
+                    },
+                    // Texto sobre tecnología
+                    {
+                        type: "passage",
+                        text: "Smartphones have changed our lives in many ways. We use them to call people, send messages, take photos, and browse the internet. Many people also use smartphones to listen to music, watch videos, and play games. However, it's important to use them responsibly and not spend too much time looking at the screen.",
+                        questions: [
+                            {
+                                question: "What is the main topic?",
+                                options: ["Computers", "Smartphones", "Internet", "Games"],
+                                correct: 1
+                            },
+                            {
+                                question: "What activities are mentioned?",
+                                options: ["Only calling", "Only texting", "Many activities", "Only games"],
+                                correct: 2
+                            },
+                            {
+                                question: "What advice is given?",
+                                options: ["Buy more phones", "Use them responsibly", "Never use them", "Use them all day"],
+                                correct: 1
+                            }
+                        ],
+                        difficulty: "hard"
+                    }
+                ]
+            }
+        };
+
+        // ===== FUNCIONES PRINCIPALES =====
+        function initGame() {
+            console.log('🎮 Iniciando English Adventure World');
+            
+            setupControls();
+            setupMobileControls();
+            loadProgress();
+            updateHUD();
+            gameLoop();
+            
+            console.log('✅ Juego inicializado correctamente');
+        }
+
+        // ===== FUNCIÓN DE REGRESO AL MENÚ =====
+        function goToMainMenu() {
+            // Guardar progreso antes de salir
+            saveProgress();
+            
+            // Redirigir a intro.html
+            window.location.href = 'intro.html';
+        }
+
+        // ===== CONTROLES =====
+        function setupControls() {
+            document.addEventListener('keydown', (e) => {
+                inputState.keys[e.key.toLowerCase()] = true;
+                
+                if (e.key === ' ' || e.key === 'Enter') {
+                    e.preventDefault();
+                    if (gameState.nearZone) {
+                        enterZone(gameState.nearZone);
+                    }
+                }
+                
+                if (e.key === 'Escape') {
+                    closeGame();
+                }
+            });
+            
+            document.addEventListener('keyup', (e) => {
+                inputState.keys[e.key.toLowerCase()] = false;
+            });
+        }
+
+        function setupMobileControls() {
+            if ('ontouchstart' in window) {
+                document.querySelector('.mobile-controls').style.display = 'flex';
+                
+                const joystick = document.getElementById('joystick');
+                const knob = document.getElementById('joystickKnob');
+                
+                let joystickRect = joystick.getBoundingClientRect();
+                const joystickRadius = 60;
+                
+                function updateJoystickRect() {
+                    joystickRect = joystick.getBoundingClientRect();
+                }
+                
+                window.addEventListener('resize', updateJoystickRect);
+                
+                joystick.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    inputState.joystickActive = true;
+                    updateJoystickRect();
+                });
+                
+                joystick.addEventListener('touchmove', (e) => {
+                    if (!inputState.joystickActive) return;
+                    e.preventDefault();
+                    
+                    const touch = e.touches[0];
+                    const centerX = joystickRect.left + joystickRect.width / 2;
+                    const centerY = joystickRect.top + joystickRect.height / 2;
+                    
+                    let deltaX = touch.clientX - centerX;
+                    let deltaY = touch.clientY - centerY;
+                    
+                    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                    
+                    if (distance > joystickRadius - 20) {
+                        const angle = Math.atan2(deltaY, deltaX);
+                        deltaX = Math.cos(angle) * (joystickRadius - 20);
+                        deltaY = Math.sin(angle) * (joystickRadius - 20);
+                    }
+                    
+                    knob.style.transform = `translate(-50%, -50%) translate(${deltaX}px, ${deltaY}px)`;
+                    
+                    const threshold = 25;
+                    inputState.keys['w'] = deltaY < -threshold;
+                    inputState.keys['s'] = deltaY > threshold;
+                    inputState.keys['a'] = deltaX < -threshold;
+                    inputState.keys['d'] = deltaX > threshold;
+                });
+                
+                joystick.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    inputState.joystickActive = false;
+                    knob.style.transform = 'translate(-50%, -50%)';
+                    
+                    inputState.keys['w'] = false;
+                    inputState.keys['s'] = false;
+                    inputState.keys['a'] = false;
+                    inputState.keys['d'] = false;
+                });
+                
+                document.getElementById('actionBtn').addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    if (gameState.nearZone) {
+                        enterZone(gameState.nearZone);
+                    }
+                });
+            }
+        }
+
+        // ===== MOVIMIENTO DEL JUGADOR =====
+        function updatePlayer() {
+            const speed = 4;
+            let newX = gameState.playerPosition.x;
+            let newY = gameState.playerPosition.y;
+            let moving = false;
+            
+            if (inputState.keys['w'] || inputState.keys['arrowup']) {
+                newY -= speed;
+                moving = true;
+            }
+            if (inputState.keys['s'] || inputState.keys['arrowdown']) {
+                newY += speed;
+                moving = true;
+            }
+            if (inputState.keys['a'] || inputState.keys['arrowleft']) {
+                newX -= speed;
+                moving = true;
+            }
+            if (inputState.keys['d'] || inputState.keys['arrowright']) {
+                newX += speed;
+                moving = true;
+            }
+            
+            newX = Math.max(50, Math.min(1150, newX));
+            newY = Math.max(50, Math.min(750, newY));
+            
+            gameState.playerPosition.x = newX;
+            gameState.playerPosition.y = newY;
+            gameState.isMoving = moving;
+            
+            const player = document.getElementById('player');
+            player.style.left = newX + 'px';
+            player.style.top = newY + 'px';
+            
+            if (moving) {
+                player.classList.add('walking');
+            } else {
+                player.classList.remove('walking');
+            }
+            
+            checkZoneProximity();
+        }
+
+        function checkZoneProximity() {
+            const zones = document.querySelectorAll('.learning-zone');
+            let nearestZone = null;
+            let minDistance = Infinity;
+            
+            zones.forEach(zone => {
+                const rect = zone.getBoundingClientRect();
+                const worldRect = document.getElementById('worldContainer').getBoundingClientRect();
+                
+                const zoneX = (rect.left - worldRect.left) + rect.width / 2;
+                const zoneY = (rect.top - worldRect.top) + rect.height / 2;
+                
+                const distance = Math.sqrt(
+                    Math.pow(gameState.playerPosition.x - zoneX, 2) +
+                    Math.pow(gameState.playerPosition.y - zoneY, 2)
+                );
+                
+                if (distance < 100 && distance < minDistance) {
+                    minDistance = distance;
+                    nearestZone = zone.dataset.zone;
+                }
+            });
+            
+            if (gameState.nearZone !== nearestZone) {
+                if (gameState.nearZone) {
+                    const oldZone = document.querySelector(`[data-zone="${gameState.nearZone}"]`);
+                    if (oldZone) oldZone.classList.remove('near', 'active');
+                }
+                
+                gameState.nearZone = nearestZone;
+                
+                if (nearestZone) {
+                    const newZone = document.querySelector(`[data-zone="${nearestZone}"]`);
+                    if (newZone) {
+                        newZone.classList.add('near', 'active');
+                        createParticles(newZone);
+                    }
+                }
+            }
+        }
+
+        // ===== EFECTOS VISUALES =====
+        function createParticles(element) {
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    
+                    const rect = element.getBoundingClientRect();
+                    particle.style.left = (rect.left + Math.random() * rect.width) + 'px';
+                    particle.style.top = (rect.top + Math.random() * rect.height) + 'px';
+                    
+                    document.body.appendChild(particle);
+                    
+                    setTimeout(() => {
+                        if (particle.parentNode) {
+                            particle.parentNode.removeChild(particle);
+                        }
+                    }, 2000);
+                }, i * 200);
+            }
+        }
+
+        function showScorePopup(points) {
+            const popup = document.createElement('div');
+            popup.className = 'score-popup';
+            popup.textContent = `+${points} puntos!`;
+            
+            document.body.appendChild(popup);
+            
+            setTimeout(() => {
+                if (popup.parentNode) {
+                    popup.parentNode.removeChild(popup);
+                }
+            }, 2000);
+        }
+
+        function showCoinPopup(coins) {
+            const popup = document.createElement('div');
+            popup.className = 'coin-popup';
+            popup.innerHTML = `🪙 +${coins} monedas!`;
+            
+            document.body.appendChild(popup);
+            
+            setTimeout(() => {
+                if (popup.parentNode) {
+                    popup.parentNode.removeChild(popup);
+                }
+            }, 2000);
+        }
+
+        function showLevelUpPopup() {
+            const popup = document.createElement('div');
+            popup.className = 'level-up-popup';
+            popup.innerHTML = `
+                <div style="font-size: 3rem; margin-bottom: 10px;">🎓</div>
+                <div>¡NIVEL ${gameState.level}!</div>
+                <div style="font-size: 1rem; margin-top: 10px;">¡Sigue así!</div>
+            `;
+            
+            document.body.appendChild(popup);
+            
+            setTimeout(() => {
+                if (popup.parentNode) {
+                    popup.parentNode.removeChild(popup);
+                }
+            }, 3000);
+        }
+
+        // ===== SISTEMA DE JUEGOS =====
+        function enterZone(zoneName) {
+            gameState.currentZone = zoneName;
+            gameState.currentGame = gameData[zoneName];
+            gameState.gameProgress = 0;
+            
+            // Resetear estadísticas de sesión
+            gameState.sessionStats = {
+                correct: 0,
+                incorrect: 0,
+                coinsEarned: 0,
+                questionsAnswered: 0
+            };
+            
+            const modal = document.getElementById('gameModal');
+            const title = document.getElementById('modalTitle');
+            const subtitle = document.getElementById('modalSubtitle');
+            
+            title.textContent = gameState.currentGame.title;
+            subtitle.textContent = gameState.currentGame.subtitle; 
+                           modal.classList.add('active');
+            
+            loadCurrentExercise();
+        }
+
+        function loadCurrentExercise() {
+            const exercise = gameState.currentGame.exercises[gameState.gameProgress];
+            const content = document.getElementById('gameContent');
+            const progressFill = document.getElementById('progressFill');
+            const questionCounter = document.getElementById('questionCounter');
+            
+            // Actualizar contador y progreso
+            const current = gameState.gameProgress + 1;
+            const total = gameState.currentGame.exercises.length;
+            questionCounter.textContent = `${current}/${total}`;
+            
+            const progress = (current / total) * 100;
+            progressFill.style.width = progress + '%';
+            
+            // Actualizar progreso mini en HUD
+            const miniProgress = (gameState.gameProgress / total) * 100;
+            document.getElementById('miniProgressFill').style.width = miniProgress + '%';
+            
+            content.innerHTML = '';
+            
+            // Mostrar estadísticas si no es la primera pregunta
+            if (gameState.gameProgress > 0) {
+                updateSessionStats();
+            }
+            
+            switch (exercise.type) {
+                case 'match':
+                    createMatchGame(exercise, content);
+                    break;
+                case 'select':
+                    createSelectGame(exercise, content);
+                    break;
+                case 'spell':
+                    createSpellGame(exercise, content);
+                    break;
+                case 'sentence':
+                    createSentenceGame(exercise, content);
+                    break;
+                case 'fill':
+                    createFillGame(exercise, content);
+                    break;
+                case 'audio':
+                    createAudioGame(exercise, content);
+                    break;
+                case 'passage':
+                    createReadingGame(exercise, content);
+                    break;
+                case 'repeat':
+                    createSpeakingGame(exercise, content);
+                    break;
+                case 'dictation':
+                    createDictationGame(exercise, content);
+                    break;
+                case 'describe':
+                    createDescribeGame(exercise, content);
+                    break;
+                default:
+                    content.innerHTML = '<p>Tipo de ejercicio no implementado</p>';
+            }
+            
+            // Resetear botones
+            document.getElementById('nextBtn').disabled = true;
+            document.getElementById('hintBtn').disabled = false;
+        }
+
+        // ===== TIPOS DE JUEGOS MEJORADOS =====
+        function createMatchGame(exercise, container) {
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question-text';
+            questionDiv.innerHTML = `
+                <h3>${exercise.question}</h3>
+                <p style="color: #666; margin-top: 10px;">Dificultad: ${getDifficultyText(exercise.difficulty)}</p>
+            `;
+            container.appendChild(questionDiv);
+            
+            const gridDiv = document.createElement('div');
+            gridDiv.className = 'vocabulary-grid';
+            gridDiv.id = 'matchGrid';
+            
+            // Crear cartas de inglés
+            exercise.pairs.forEach((pair, index) => {
+                const card = document.createElement('div');
+                card.className = 'word-card';
+                card.dataset.type = 'english';
+                card.dataset.index = index;
+                card.onclick = () => selectCard(card);
+                card.innerHTML = `
+                    <div style="font-size: 2.5rem; margin-bottom: 10px;">${pair.image}</div>
+                    <div style="font-size: 1.3rem; font-weight: bold;">${pair.english}</div>
+                `;
+                gridDiv.appendChild(card);
+            });
+            
+            // Crear cartas de español (mezcladas)
+            const shuffledPairs = [...exercise.pairs].sort(() => Math.random() - 0.5);
+            shuffledPairs.forEach((pair) => {
+                const card = document.createElement('div');
+                card.className = 'word-card';
+                card.dataset.type = 'spanish';
+                card.dataset.word = pair.english;
+                card.onclick = () => selectCard(card);
+                card.innerHTML = `
+                    <div style="font-size: 1.2rem; font-weight: bold;">${pair.spanish}</div>
+                `;
+                gridDiv.appendChild(card);
+            });
+            
+            container.appendChild(gridDiv);
+            
+            // Inicializar variables del juego
+            container.selectedCards = [];
+            container.matchedPairs = 0;
+            container.totalPairs = exercise.pairs.length;
+        }
+
+        function createSelectGame(exercise, container) {
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question-text';
+            questionDiv.innerHTML = `
+                <h3>${exercise.question}</h3>
+                <p style="color: #666; margin-top: 10px;">Dificultad: ${getDifficultyText(exercise.difficulty)}</p>
+            `;
+            container.appendChild(questionDiv);
+            
+            if (exercise.image) {
+                const imageDiv = document.createElement('div');
+                imageDiv.style.cssText = 'text-align: center; margin: 30px 0;';
+                imageDiv.innerHTML = `<div style="font-size: 5rem;">${exercise.image}</div>`;
+                container.appendChild(imageDiv);
+            }
+            
+            const gridDiv = document.createElement('div');
+            gridDiv.className = 'vocabulary-grid';
+            
+            exercise.options.forEach((option, index) => {
+                const card = document.createElement('div');
+                card.className = 'word-card';
+                card.onclick = () => selectOption(index, exercise.correct);
+                card.innerHTML = `<div style="font-size: 1.2rem; font-weight: bold;">${option}</div>`;
+                gridDiv.appendChild(card);
+            });
+            
+            container.appendChild(gridDiv);
+        }
+
+        function createSpellGame(exercise, container) {
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question-text';
+            questionDiv.innerHTML = `
+                <h3>${exercise.question}</h3>
+                <p style="color: #666; margin-top: 10px;">Dificultad: ${getDifficultyText(exercise.difficulty)}</p>
+            `;
+            container.appendChild(questionDiv);
+            
+            const gameDiv = document.createElement('div');
+            gameDiv.style.cssText = 'text-align: center; margin: 30px 0;';
+            gameDiv.innerHTML = `
+                <div style="font-size: 5rem; margin-bottom: 20px;">${exercise.image}</div>
+                <p style="color: #666; margin-bottom: 30px; font-size: 1.1rem;">${exercise.hint}</p>
+                <input type="text" id="spellInput" class="spell-input" placeholder="Escribe aquí..." maxlength="${exercise.word.length + 2}">
+                <br><br>
+                <button class="btn btn-primary" onclick="checkSpelling('${exercise.word}')">✅ Verificar</button>
+            `;
+            container.appendChild(gameDiv);
+            
+            // Enfocar el input
+            setTimeout(() => {
+                document.getElementById('spellInput').focus();
+            }, 100);
+        }
+
+        function createSentenceGame(exercise, container) {
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question-text';
+            questionDiv.innerHTML = `
+                <h3>${exercise.question}</h3>
+                <p style="color: #666; margin-top: 10px;">Dificultad: ${getDifficultyText(exercise.difficulty)}</p>
+            `;
+            container.appendChild(questionDiv);
+            
+            const builderDiv = document.createElement('div');
+            builderDiv.className = 'sentence-builder';
+            builderDiv.id = 'sentenceBuilder';
+            builderDiv.ondrop = dropWord;
+            builderDiv.ondragover = allowDrop;
+            builderDiv.innerHTML = '<p style="color: #666; font-style: italic;">Arrastra las palabras aquí para formar la oración</p>';
+            container.appendChild(builderDiv);
+            
+            const wordsDiv = document.createElement('div');
+            wordsDiv.className = 'vocabulary-grid';
+            
+            const shuffledWords = [...exercise.words].sort(() => Math.random() - 0.5);
+            shuffledWords.forEach(word => {
+                const card = document.createElement('div');
+                card.className = 'word-card';
+                card.draggable = true;
+                card.ondragstart = dragWord;
+                card.dataset.word = word;
+                card.innerHTML = `<div style="font-size: 1.2rem; font-weight: bold;">${word}</div>`;
+                wordsDiv.appendChild(card);
+            });
+            
+            container.appendChild(wordsDiv);
+            
+            const checkBtn = document.createElement('button');
+            checkBtn.className = 'btn btn-primary';
+            checkBtn.style.cssText = 'margin-top: 20px; display: block; margin-left: auto; margin-right: auto;';
+            checkBtn.onclick = () => checkSentence(exercise.correct);
+            checkBtn.innerHTML = '✅ Verificar Oración';
+            container.appendChild(checkBtn);
+        }
+
+        function createFillGame(exercise, container) {
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question-text';
+            questionDiv.innerHTML = `
+                <h3>${exercise.question}</h3>
+                <p style="color: #666; margin-top: 10px;">Dificultad: ${getDifficultyText(exercise.difficulty)}</p>
+            `;
+            container.appendChild(questionDiv);
+            
+            const sentenceDiv = document.createElement('div');
+            sentenceDiv.style.cssText = 'background: #f8f9fa; padding: 25px; border-radius: 15px; margin: 20px 0; text-align: center;';
+            sentenceDiv.innerHTML = `<p style="font-size: 1.4rem; font-weight: 500;">${exercise.sentence}</p>`;
+            container.appendChild(sentenceDiv);
+            
+            const gridDiv = document.createElement('div');
+            gridDiv.className = 'vocabulary-grid';
+            
+            exercise.options.forEach((option, index) => {
+                const card = document.createElement('div');
+                card.className = 'word-card';
+                card.onclick = () => selectFillOption(index, exercise.correct);
+                card.innerHTML = `<div style="font-size: 1.2rem; font-weight: bold;">${option}</div>`;
+                gridDiv.appendChild(card);
+            });
+            
+            container.appendChild(gridDiv);
+        }
+
+        function createAudioGame(exercise, container) {
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question-text';
+            questionDiv.innerHTML = `
+                <h3>${exercise.question}</h3>
+                <p style="color: #666; margin-top: 10px;">Dificultad: ${getDifficultyText(exercise.difficulty)}</p>
+            `;
+            container.appendChild(questionDiv);
+            
+            const playerDiv = document.createElement('div');
+            playerDiv.className = 'listening-player';
+            playerDiv.innerHTML = `
+                <button class="btn btn-warning" onclick="playAudio('${exercise.audio}')" style="margin: 20px; font-size: 1.2rem;">
+                    🔊 Reproducir Audio
+                </button>
+                <div id="audioText" style="display: none; margin: 20px; font-size: 1.3rem; background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px;">${exercise.audio}</div>
+            `;
+            container.appendChild(playerDiv);
+            
+            const gridDiv = document.createElement('div');
+            gridDiv.className = 'vocabulary-grid';
+            
+            exercise.options.forEach((option, index) => {
+                const card = document.createElement('div');
+                card.className = 'word-card';
+                card.onclick = () => selectAudioOption(index, exercise.correct);
+                card.innerHTML = `<div style="font-size: 1.1rem; font-weight: bold;">${option}</div>`;
+                gridDiv.appendChild(card);
+            });
+            
+            container.appendChild(gridDiv);
+        }
+
+        function createReadingGame(exercise, container) {
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question-text';
+            questionDiv.innerHTML = `
+                <h3>Lee el siguiente texto y responde las preguntas:</h3>
+                <p style="color: #666; margin-top: 10px;">Dificultad: ${getDifficultyText(exercise.difficulty)}</p>
+            `;
+            container.appendChild(questionDiv);
+            
+            const passageDiv = document.createElement('div');
+            passageDiv.className = 'reading-passage';
+            passageDiv.innerHTML = `<p>${exercise.text}</p>`;
+            container.appendChild(passageDiv);
+            
+            const questionsDiv = document.createElement('div');
+            questionsDiv.id = 'readingQuestions';
+            
+            exercise.questions.forEach((q, qIndex) => {
+                const questionContainer = document.createElement('div');
+                questionContainer.style.cssText = 'background: #f8f9fa; padding: 20px; border-radius: 15px; margin: 20px 0; border-left: 5px solid var(--primary);';
+                
+                const questionTitle = document.createElement('h4');
+                questionTitle.textContent = `${qIndex + 1}. ${q.question}`;
+                questionTitle.style.marginBottom = '15px';
+                questionContainer.appendChild(questionTitle);
+                
+                const optionsGrid = document.createElement('div');
+                optionsGrid.className = 'vocabulary-grid';
+                
+                q.options.forEach((option, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'word-card';
+                    card.onclick = () => selectReadingOption(qIndex, index, q.correct);
+                    card.innerHTML = `<div style="font-size: 1.1rem;">${option}</div>`;
+                    optionsGrid.appendChild(card);
+                });
+                
+                questionContainer.appendChild(optionsGrid);
+                questionsDiv.appendChild(questionContainer);
+            });
+            
+            container.appendChild(questionsDiv);
+            
+            // Inicializar variables
+            container.correctAnswers = 0;
+            container.totalQuestions = exercise.questions.length;
+            container.answeredQuestions = 0;
+        }
+
+        function createSpeakingGame(exercise, container) {
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question-text';
+            questionDiv.innerHTML = `
+                <h3>${exercise.question}</h3>
+                <p style="color: #666; margin-top: 10px;">Dificultad: ${getDifficultyText(exercise.difficulty)}</p>
+            `;
+            container.appendChild(questionDiv);
+            
+            const recorderDiv = document.createElement('div');
+            recorderDiv.className = 'speaking-recorder';
+            recorderDiv.innerHTML = `
+                <div style="font-size: 1.8rem; margin: 20px; padding: 25px; background: rgba(255,255,255,0.2); border-radius: 15px; line-height: 1.4;">
+                    "${exercise.phrase}"
+                </div>
+                ${exercise.phonetic ? `<div style="font-size: 1.1rem; margin: 15px; opacity: 0.9; font-style: italic;">Pronunciación: ${exercise.phonetic}</div>` : ''}
+                <div style="margin: 25px;">
+                                        <button class="btn btn-primary" onclick="startRecording()" style="margin: 10px; font-size: 1.1rem;">
+                        🎤 Grabar Pronunciación
+                    </button>
+                    <button class="btn btn-secondary" onclick="playExample('${exercise.phrase}')" style="margin: 10px; font-size: 1.1rem;">
+                        🔊 Escuchar Ejemplo
+                    </button>
+                </div>
+                <div id="recordingStatus" style="margin: 20px; font-size: 1.2rem; min-height: 30px;"></div>
+            `;
+            container.appendChild(recorderDiv);
+        }
+
+        function createDictationGame(exercise, container) {
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question-text';
+            questionDiv.innerHTML = `
+                <h3>${exercise.question}</h3>
+                <p style="color: #666; margin-top: 10px;">Dificultad: ${getDifficultyText(exercise.difficulty)}</p>
+            `;
+            container.appendChild(questionDiv);
+            
+            const playerDiv = document.createElement('div');
+            playerDiv.className = 'listening-player';
+            playerDiv.innerHTML = `
+                <button class="btn btn-warning" onclick="playAudio('${exercise.audio}')" style="margin: 20px; font-size: 1.2rem;">
+                    🔊 Reproducir Audio
+                </button>
+                <div style="margin: 20px;">
+                    <input type="text" id="dictationInput" class="spell-input" placeholder="Escribe lo que escuchas..." style="width: 100%; max-width: 400px;">
+                </div>
+                <button class="btn btn-primary" onclick="checkDictation('${exercise.answer}')" style="margin: 10px;">
+                    ✅ Verificar
+                </button>
+            `;
+            container.appendChild(playerDiv);
+        }
+
+        function createDescribeGame(exercise, container) {
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question-text';
+            questionDiv.innerHTML = `
+                <h3>${exercise.question}</h3>
+                <p style="color: #666; margin-top: 10px;">Dificultad: ${getDifficultyText(exercise.difficulty)}</p>
+            `;
+            container.appendChild(questionDiv);
+            
+            const imageDiv = document.createElement('div');
+            imageDiv.style.cssText = 'text-align: center; margin: 30px 0;';
+            imageDiv.innerHTML = `<div style="font-size: 8rem;">${exercise.image}</div>`;
+            container.appendChild(imageDiv);
+            
+            const recorderDiv = document.createElement('div');
+            recorderDiv.className = 'speaking-recorder';
+            recorderDiv.innerHTML = `
+                <p style="margin: 20px; font-size: 1.1rem;">Palabras clave: ${exercise.keywords.join(', ')}</p>
+                <button class="btn btn-primary" onclick="startDescribing()" style="margin: 20px;">
+                    🎤 Comenzar Descripción
+                </button>
+                <div id="describeStatus" style="margin: 20px; font-size: 1.2rem; min-height: 30px;"></div>
+            `;
+            container.appendChild(recorderDiv);
+        }
+
+        // ===== FUNCIONES DE INTERACCIÓN MEJORADAS =====
+        function selectCard(card) {
+            const container = document.getElementById('gameContent');
+            
+            if (card.classList.contains('correct') || card.classList.contains('incorrect') || card.classList.contains('disabled')) {
+                return;
+            }
+            
+            // Deseleccionar otras cartas del mismo tipo
+            const sameType = container.querySelectorAll(`[data-type="${card.dataset.type}"].selected`);
+            sameType.forEach(c => c.classList.remove('selected'));
+            
+            card.classList.add('selected');
+            
+            // Verificar si hay dos cartas seleccionadas
+            const selected = container.querySelectorAll('.selected');
+            if (selected.length === 2) {
+                setTimeout(() => checkMatch(selected[0], selected[1], container), 500);
+            }
+        }
+
+        function checkMatch(card1, card2, container) {
+            const isMatch = (card1.dataset.type === 'english' && card2.dataset.word === card1.querySelector('div:last-child').textContent) ||
+                           (card2.dataset.type === 'english' && card1.dataset.word === card2.querySelector('div:last-child').textContent);
+            
+            card1.classList.remove('selected');
+            card2.classList.remove('selected');
+            
+            if (isMatch) {
+                card1.classList.add('correct');
+                card2.classList.add('correct');
+                
+                container.matchedPairs++;
+                const points = getDifficultyPoints('easy');
+                const coins = getDifficultyCoins('easy');
+                
+                addScore(points);
+                addCoins(coins);
+                playSound('success');
+                
+                if (container.matchedPairs >= container.totalPairs) {
+                    setTimeout(() => {
+                        gameState.sessionStats.correct++;
+                        document.getElementById('nextBtn').disabled = false;
+                        showScorePopup(points * 2); // Bonus por completar
+                    }, 1000);
+                }
+            } else {
+                card1.classList.add('incorrect');
+                card2.classList.add('incorrect');
+                
+                gameState.sessionStats.incorrect++;
+                playSound('error');
+                
+                setTimeout(() => {
+                    card1.classList.remove('incorrect');
+                    card2.classList.remove('incorrect');
+                }, 1000);
+            }
+        }
+
+        function selectOption(selectedIndex, correctIndex) {
+            const cards = document.querySelectorAll('.word-card');
+            
+            cards.forEach((card, index) => {
+                card.classList.add('disabled');
+                if (index === correctIndex) {
+                    card.classList.add('correct');
+                } else if (index === selectedIndex && selectedIndex !== correctIndex) {
+                    card.classList.add('incorrect');
+                }
+            });
+            
+            if (selectedIndex === correctIndex) {
+                const points = getDifficultyPoints('medium');
+                const coins = getDifficultyCoins('medium');
+                
+                gameState.sessionStats.correct++;
+                addScore(points);
+                addCoins(coins);
+                playSound('success');
+                
+                setTimeout(() => {
+                    document.getElementById('nextBtn').disabled = false;
+                    showScorePopup(points);
+                }, 1000);
+            } else {
+                gameState.sessionStats.incorrect++;
+                playSound('error');
+                
+                setTimeout(() => {
+                    document.getElementById('nextBtn').disabled = false;
+                }, 2000);
+            }
+        }
+
+        function checkSpelling(correctWord) {
+            const input = document.getElementById('spellInput');
+            const userAnswer = input.value.toUpperCase().trim();
+            
+            if (userAnswer === correctWord) {
+                input.style.borderColor = '#4CAF50';
+                input.style.backgroundColor = '#E8F5E8';
+                
+                const points = getDifficultyPoints('hard');
+                const coins = getDifficultyCoins('hard');
+                
+                gameState.sessionStats.correct++;
+                addScore(points);
+                addCoins(coins);
+                playSound('success');
+                
+                setTimeout(() => {
+                    document.getElementById('nextBtn').disabled = false;
+                    showScorePopup(points);
+                }, 1000);
+            } else {
+                input.style.borderColor = '#F44336';
+                input.style.backgroundColor = '#FFEBEE';
+                
+                gameState.sessionStats.incorrect++;
+                playSound('error');
+                
+                setTimeout(() => {
+                    input.style.borderColor = '#ddd';
+                    input.style.backgroundColor = 'white';
+                    document.getElementById('nextBtn').disabled = false;
+                }, 2000);
+            }
+        }
+
+        function checkDictation(correctAnswer) {
+            const input = document.getElementById('dictationInput');
+            const userAnswer = input.value.toLowerCase().trim();
+            const correct = correctAnswer.toLowerCase().trim();
+            
+            if (userAnswer === correct) {
+                input.style.borderColor = '#4CAF50';
+                input.style.backgroundColor = '#E8F5E8';
+                
+                const points = getDifficultyPoints('medium');
+                const coins = getDifficultyCoins('medium');
+                
+                gameState.sessionStats.correct++;
+                addScore(points);
+                addCoins(coins);
+                playSound('success');
+                
+                setTimeout(() => {
+                    document.getElementById('nextBtn').disabled = false;
+                    showScorePopup(points);
+                }, 1000);
+            } else {
+                input.style.borderColor = '#F44336';
+                input.style.backgroundColor = '#FFEBEE';
+                
+                gameState.sessionStats.incorrect++;
+                playSound('error');
+                
+                setTimeout(() => {
+                    input.style.borderColor = '#ddd';
+                    input.style.backgroundColor = 'white';
+                    document.getElementById('nextBtn').disabled = false;
+                }, 2000);
+            }
+        }
+
+        // ===== FUNCIONES DE DRAG & DROP =====
+        function dragWord(event) {
+            event.dataTransfer.setData("text", event.target.dataset.word);
+            event.target.style.opacity = '0.5';
+        }
+
+        function allowDrop(event) {
+            event.preventDefault();
+        }
+
+        function dropWord(event) {
+            event.preventDefault();
+            const word = event.dataTransfer.getData("text");
+            const builder = document.getElementById('sentenceBuilder');
+            
+            // Crear elemento de palabra en la oración
+            const wordElement = document.createElement('span');
+            wordElement.className = 'sentence-word';
+            wordElement.textContent = word;
+            wordElement.onclick = () => removeWord(wordElement, word);
+            
+            builder.appendChild(wordElement);
+            builder.classList.add('has-words');
+            
+            // Remover palabra original
+            const originalCard = document.querySelector(`[data-word="${word}"]`);
+            if (originalCard) {
+                originalCard.style.display = 'none';
+            }
+            
+            // Limpiar texto de ayuda
+            const helpText = builder.querySelector('p');
+            if (helpText) {
+                helpText.style.display = 'none';
+            }
+        }
+
+        function removeWord(wordElement, word) {
+            // Remover palabra de la oración
+            wordElement.remove();
+            
+            // Mostrar palabra original
+            const originalCard = document.querySelector(`[data-word="${word}"]`);
+            if (originalCard) {
+                originalCard.style.display = 'inline-block';
+                originalCard.style.opacity = '1';
+            }
+            
+            // Verificar si la oración está vacía
+            const builder = document.getElementById('sentenceBuilder');
+            const words = builder.querySelectorAll('.sentence-word');
+            if (words.length === 0) {
+                builder.classList.remove('has-words');
+                const helpText = builder.querySelector('p');
+                if (helpText) {
+                    helpText.style.display = 'block';
+                }
+            }
+        }
+
+        function checkSentence(correctSentence) {
+            const builder = document.getElementById('sentenceBuilder');
+            const words = Array.from(builder.querySelectorAll('.sentence-word')).map(span => span.textContent);
+            const userSentence = words.join(' ').trim();
+            
+            if (userSentence.toLowerCase() === correctSentence.toLowerCase()) {
+                builder.style.borderColor = '#4CAF50';
+                builder.style.backgroundColor = 'rgba(76, 175, 80, 0.1)';
+                
+                const points = getDifficultyPoints('hard');
+                const coins = getDifficultyCoins('hard');
+                
+                gameState.sessionStats.correct++;
+                addScore(points);
+                addCoins(coins);
+                playSound('success');
+                
+                setTimeout(() => {
+                    document.getElementById('nextBtn').disabled = false;
+                    showScorePopup(points);
+                }, 1000);
+            } else {
+                builder.style.borderColor = '#F44336';
+                builder.style.backgroundColor = 'rgba(244, 67, 54, 0.1)';
+                
+                gameState.sessionStats.incorrect++;
+                playSound('error');
+                
+                setTimeout(() => {
+                    builder.style.borderColor = '#2196F3';
+                    builder.style.backgroundColor = 'rgba(33, 150, 243, 0.1)';
+                    document.getElementById('nextBtn').disabled = false;
+                }, 2000);
+            }
+        }
+
+        // ===== FUNCIONES DE AUDIO Y SPEAKING =====
+        function playAudio(text) {
+            const audioText = document.getElementById('audioText');
+            if (audioText) {
+                audioText.style.display = 'block';
+                setTimeout(() => {
+                    audioText.style.display = 'none';
+                }, 3000);
+            }
+            
+            if ('speechSynthesis' in window) {
+                // Cancelar cualquier síntesis anterior
+                speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.8;
+                utterance.pitch = 1;
+                utterance.volume = 0.8;
+                
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        function playExample(phrase) {
+            if ('speechSynthesis' in window) {
+                speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(phrase);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.7;
+                utterance.pitch = 1;
+                utterance.volume = 0.9;
+                
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        function startRecording() {
+            const status = document.getElementById('recordingStatus');
+            status.innerHTML = '🔴 Grabando... (3 segundos)';
+            status.style.color = '#F44336';
+            
+            let countdown = 3;
+            const countdownInterval = setInterval(() => {
+                countdown--;
+                if (countdown > 0) {
+                    status.innerHTML = `🔴 Grabando... (${countdown} segundos)`;
+                } else {
+                    clearInterval(countdownInterval);
+                    status.innerHTML = '✅ ¡Excelente pronunciación!';
+                    status.style.color = '#4CAF50';
+                    
+                    const points = getDifficultyPoints('medium');
+                    const coins = getDifficultyCoins('medium');
+                    
+                    gameState.sessionStats.correct++;
+                    addScore(points);
+                    addCoins(coins);
+                    playSound('success');
+                    
+                    setTimeout(() => {
+                        document.getElementById('nextBtn').disabled = false;
+                        showScorePopup(points);
+                    }, 1000);
+                }
+            }, 1000);
+        }
+
+        function startDescribing() {
+            const status = document.getElementById('describeStatus');
+            status.innerHTML = '🎤 Describiendo... (5 segundos)';
+            status.style.color = '#9C27B0';
+            
+            let countdown = 5;
+            const countdownInterval = setInterval(() => {
+                countdown--;
+                if (countdown > 0) {
+                    status.innerHTML = `🎤 Describiendo... (${countdown} segundos)`;
+                } else {
+                    clearInterval(countdownInterval);
+                    status.innerHTML = '✅ ¡Buena descripción!';
+                    status.style.color = '#4CAF50';
+                                        const points = getDifficultyPoints('hard');
+                    const coins = getDifficultyCoins('hard');
+                    
+                    gameState.sessionStats.correct++;
+                    addScore(points);
+                    addCoins(coins);
+                    playSound('success');
+                    
+                    setTimeout(() => {
+                        document.getElementById('nextBtn').disabled = false;
+                        showScorePopup(points);
+                    }, 1000);
+                }
+            }, 1000);
+        }
+
+        // ===== FUNCIONES DE READING =====
+        function selectReadingOption(questionIndex, selectedIndex, correctIndex) {
+            const container = document.getElementById('gameContent');
+            const questionDiv = document.querySelectorAll('#readingQuestions > div')[questionIndex];
+            const cards = questionDiv.querySelectorAll('.word-card');
+            
+            cards.forEach((card, index) => {
+                card.classList.add('disabled');
+                if (index === correctIndex) {
+                    card.classList.add('correct');
+                } else if (index === selectedIndex && selectedIndex !== correctIndex) {
+                    card.classList.add('incorrect');
+                }
+            });
+            
+            if (selectedIndex === correctIndex) {
+                container.correctAnswers++;
+                gameState.sessionStats.correct++;
+                
+                const points = getDifficultyPoints('medium');
+                const coins = getDifficultyCoins('medium');
+                addScore(points);
+                addCoins(coins);
+                playSound('success');
+            } else {
+                gameState.sessionStats.incorrect++;
+                playSound('error');
+            }
+            
+            container.answeredQuestions++;
+            
+            // Verificar si todas las preguntas están respondidas
+            setTimeout(() => {
+                if (container.answeredQuestions >= container.totalQuestions) {
+                    document.getElementById('nextBtn').disabled = false;
+                    
+                    // Bonus por completar todas las preguntas
+                    if (container.correctAnswers === container.totalQuestions) {
+                        const bonusPoints = container.totalQuestions * 5;
+                        const bonusCoins = container.totalQuestions * 2;
+                        addScore(bonusPoints);
+                        addCoins(bonusCoins);
+                        showScorePopup(bonusPoints);
+                    }
+                }
+            }, 500);
+        }
+
+        // ===== FUNCIONES DE FILL =====
+        function selectFillOption(selectedIndex, correctIndex) {
+            const cards = document.querySelectorAll('.word-card');
+            
+            cards.forEach((card, index) => {
+                card.classList.add('disabled');
+                if (index === correctIndex) {
+                    card.classList.add('correct');
+                } else if (index === selectedIndex && selectedIndex !== correctIndex) {
+                    card.classList.add('incorrect');
+                }
+            });
+            
+            if (selectedIndex === correctIndex) {
+                const points = getDifficultyPoints('medium');
+                const coins = getDifficultyCoins('medium');
+                
+                gameState.sessionStats.correct++;
+                addScore(points);
+                addCoins(coins);
+                playSound('success');
+                
+                setTimeout(() => {
+                    document.getElementById('nextBtn').disabled = false;
+                    showScorePopup(points);
+                }, 1000);
+            } else {
+                gameState.sessionStats.incorrect++;
+                playSound('error');
+                
+                setTimeout(() => {
+                    document.getElementById('nextBtn').disabled = false;
+                }, 2000);
+            }
+        }
+
+        function selectAudioOption(selectedIndex, correctIndex) {
+            selectOption(selectedIndex, correctIndex);
+        }
+
+        // ===== SISTEMA DE PUNTUACIÓN Y MONEDAS =====
+        function getDifficultyPoints(difficulty) {
+            switch (difficulty) {
+                case 'easy': return 10;
+                case 'medium': return 15;
+                case 'hard': return 25;
+                default: return 10;
+            }
+        }
+
+        function getDifficultyCoins(difficulty) {
+            switch (difficulty) {
+                case 'easy': return 2;
+                case 'medium': return 3;
+                case 'hard': return 5;
+                default: return 2;
+            }
+        }
+
+        function getDifficultyText(difficulty) {
+            switch (difficulty) {
+                case 'easy': return '🟢 Fácil';
+                case 'medium': return '🟡 Medio';
+                case 'hard': return '🔴 Difícil';
+                default: return '🟢 Fácil';
+            }
+        }
+
+        function addScore(points) {
+            gameState.score += points;
+            gameState.streak++;
+            updateHUD();
+            saveProgress();
+            
+            // Verificar subida de nivel
+            checkLevelUp();
+            
+            // Animación de puntuación
+            const scoreElement = document.getElementById('playerScore');
+            scoreElement.style.animation = 'scoreIncrease 0.5s ease';
+            setTimeout(() => {
+                scoreElement.style.animation = '';
+            }, 500);
+        }
+
+        function addCoins(coins) {
+            gameState.coins += coins;
+            gameState.sessionStats.coinsEarned += coins;
+            updateHUD();
+            saveProgress();
+            
+            // Sincronizar con sistema global
+            const currentCoins = localStorage.getItem('totalCoins') || '0';
+            const newTotal = parseInt(currentCoins) + coins;
+            localStorage.setItem('totalCoins', newTotal.toString());
+            
+            // Mostrar popup de monedas
+            showCoinPopup(coins);
+            
+            // Animación de monedas
+            const coinsElement = document.getElementById('playerCoins');
+            coinsElement.style.animation = 'scoreIncrease 0.5s ease';
+            setTimeout(() => {
+                coinsElement.style.animation = '';
+            }, 500);
+        }
+
+        function checkLevelUp() {
+            const requiredScore = gameState.level * 100;
+            if (gameState.score >= requiredScore) {
+                gameState.level++;
+                gameState.streak = 0;
+                
+                // Bonus de monedas por subir de nivel
+                const levelBonus = gameState.level * 10;
+                addCoins(levelBonus);
+                
+                updateHUD();
+                showLevelUpPopup();
+                playSound('levelup');
+            }
+        }
+
+        function updateHUD() {
+            document.getElementById('playerLevel').textContent = gameState.level;
+            document.getElementById('playerScore').textContent = gameState.score;
+            document.getElementById('playerCoins').textContent = gameState.coins;
+            document.getElementById('playerStreak').textContent = gameState.streak;
+            
+            // Actualizar progreso hacia el siguiente nivel
+            const currentLevelScore = (gameState.level - 1) * 100;
+            const nextLevelScore = gameState.level * 100;
+            const progress = ((gameState.score - currentLevelScore) / (nextLevelScore - currentLevelScore)) * 100;
+            document.getElementById('miniProgressFill').style.width = Math.min(100, Math.max(0, progress)) + '%';
+        }
+
+        function updateSessionStats() {
+            const statsContainer = document.getElementById('gameStats');
+            if (gameState.sessionStats.questionsAnswered > 0) {
+                statsContainer.style.display = 'grid';
+                
+                document.getElementById('correctAnswers').textContent = gameState.sessionStats.correct;
+                document.getElementById('incorrectAnswers').textContent = gameState.sessionStats.incorrect;
+                document.getElementById('currentStreak').textContent = gameState.streak;
+                document.getElementById('coinsEarned').textContent = gameState.sessionStats.coinsEarned;
+            }
+        }
+
+        // ===== NAVEGACIÓN DEL JUEGO =====
+        function nextQuestion() {
+            gameState.gameProgress++;
+            gameState.sessionStats.questionsAnswered++;
+            
+            if (gameState.gameProgress >= gameState.currentGame.exercises.length) {
+                completeGame();
+            } else {
+                document.getElementById('nextBtn').disabled = true;
+                document.getElementById('hintBtn').disabled = false;
+                loadCurrentExercise();
+            }
+        }
+
+        function completeGame() {
+            const content = document.getElementById('gameContent');
+            const totalExercises = gameState.currentGame.exercises.length;
+            const bonusPoints = totalExercises * 10;
+            const bonusCoins = totalExercises * 5;
+            
+            content.innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <div style="font-size: 5rem; margin-bottom: 20px;">🎉</div>
+                    <h2 style="color: #4CAF50; margin-bottom: 20px;">¡Zona Completada!</h2>
+                    <p style="font-size: 1.3rem; margin-bottom: 30px;">
+                        Has completado todos los ejercicios de <strong>${gameState.currentGame.title}</strong>
+                    </p>
+                    
+                    <div class="stats-container" style="margin: 30px 0;">
+                        <div class="stat-item">
+                            <div class="stat-value" style="color: #4CAF50;">${gameState.sessionStats.correct}</div>
+                            <div class="stat-label">Respuestas Correctas</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" style="color: #F44336;">${gameState.sessionStats.incorrect}</div>
+                            <div class="stat-label">Respuestas Incorrectas</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" style="color: #FF9800;">${Math.round((gameState.sessionStats.correct / (gameState.sessionStats.correct + gameState.sessionStats.incorrect)) * 100)}%</div>
+                            <div class="stat-label">Precisión</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" style="color: #9C27B0;">${gameState.sessionStats.coinsEarned + bonusCoins}</div>
+                            <div class="stat-label">Monedas Ganadas</div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: linear-gradient(45deg, #FFD700, #FFA000); color: white; padding: 25px; border-radius: 20px; margin: 30px 0; box-shadow: 0 8px 25px rgba(0,0,0,0.2);">
+                        <h3 style="margin-bottom: 10px;">🏆 Bonus de Completación</h3>
+                        <p style="font-size: 1.1rem;">+${bonusPoints} puntos | +${bonusCoins} monedas</p>
+                    </div>
+                </div>
+            `;
+            
+            // Agregar bonus
+            addScore(bonusPoints);
+            addCoins(bonusCoins);
+            
+            // Ocultar estadísticas del juego
+            document.getElementById('gameStats').style.display = 'none';
+            
+            // Actualizar botones
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('hintBtn').style.display = 'none';
+            document.getElementById('resetBtn').textContent = '🏆 ¡Genial!';
+            document.getElementById('resetBtn').className = 'btn btn-primary';
+        }
+
+        function resetGame() {
+            gameState.gameProgress = 0;
+            gameState.sessionStats = {
+                correct: 0,
+                incorrect: 0,
+                coinsEarned: 0,
+                questionsAnswered: 0
+            };
+            
+            document.getElementById('nextBtn').disabled = true;
+            document.getElementById('nextBtn').style.display = 'inline-block';
+            document.getElementById('hintBtn').style.display = 'inline-block';
+            document.getElementById('resetBtn').textContent = '🔄 Reiniciar';
+            document.getElementById('resetBtn').className = 'btn btn-danger';
+            document.getElementById('gameStats').style.display = 'none';
+            
+            loadCurrentExercise();
+        }
+
+        function closeGame() {
+            document.getElementById('gameModal').classList.remove('active');
+            gameState.currentZone = null;
+            gameState.currentGame = null;
+            
+            // Remover clase active de todas las zonas
+            document.querySelectorAll('.learning-zone').forEach(zone => {
+                zone.classList.remove('near', 'active');
+            });
+            
+            gameState.nearZone = null;
+            
+            // Cancelar cualquier síntesis de voz
+            if ('speechSynthesis' in window) {
+                speechSynthesis.cancel();
+            }
+        }
+
+        // ===== SISTEMA DE PISTAS =====
+        function showHint() {
+            const exercise = gameState.currentGame.exercises[gameState.gameProgress];
+            let hintText = '';
+            
+            switch (exercise.type) {
+                case 'match':
+                    hintText = 'Conecta cada palabra en inglés con su traducción en español. Fíjate en los emojis para ayudarte.';
+                    break;
+                case 'select':
+                    hintText = 'Lee cuidadosamente la pregunta y piensa en el contexto. Si hay una imagen, úsala como pista.';
+                    break;
+                case 'spell':
+                    hintText = `Pista: ${exercise.hint}. La palabra tiene ${exercise.word.length} letras.`;
+                    break;
+                case 'sentence':
+                    hintText = 'Recuerda el orden básico en inglés: Sujeto + Verbo + Complemento. Comienza con mayúscula y termina con punto.';
+                    break;
+                case 'fill':
+                    hintText = 'Lee la oración completa y piensa qué tipo de palabra falta (verbo, artículo, preposición, etc.).';
+                    break;
+                case 'audio':
+                    hintText = 'Escucha atentamente. Puedes reproducir el audio varias veces. Concéntrate en los sonidos.';
+                    break;
+                case 'dictation':
+                    hintText = 'Escucha palabra por palabra. No te preocupes por la velocidad, concéntrate en la precisión.';
+                    break;
+                case 'passage':
+                    hintText = 'Lee el texto completo antes de responder. Las respuestas están en el texto, búscalas cuidadosamente.';
+                    break;
+                case 'repeat':
+                    hintText = 'Escucha el ejemplo primero. Pronuncia claramente y no tengas miedo de repetir varias veces.';
+                    break;
+                case 'describe':
+                    hintText = `Usa las palabras clave: ${exercise.keywords.join(', ')}. Describe lo que ves de forma simple.`;
+                    break;
+                default:
+                    hintText = 'Lee cuidadosamente y tómate tu tiempo para pensar la respuesta.';
+            }
+            
+            // Mostrar pista en un popup
+            const hintPopup = document.createElement('div');
+            hintPopup.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(45deg, #2196F3, #1976D2);
+                color: white;
+                padding: 25px 35px;
+                border-radius: 20px;
+                font-size: 1.1rem;
+                z-index: 700;
+                max-width: 500px;
+                text-align: center;
+                box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+                                animation: modalSlideIn 0.4s ease;
+            `;
+            
+            hintPopup.innerHTML = `
+                <div style="font-size: 2rem; margin-bottom: 15px;">💡</div>
+                <h3 style="margin-bottom: 15px;">Pista</h3>
+                <p style="line-height: 1.5;">${hintText}</p>
+                <button onclick="this.parentNode.remove()" style="
+                    background: rgba(255,255,255,0.2);
+                    border: 2px solid white;
+                    color: white;
+                    padding: 10px 20px;
+                    border-radius: 15px;
+                    margin-top: 20px;
+                    cursor: pointer;
+                    font-weight: bold;
+                ">Entendido</button>
+            `;
+            
+            document.body.appendChild(hintPopup);
+            
+            // Remover automáticamente después de 8 segundos
+            setTimeout(() => {
+                if (hintPopup.parentNode) {
+                    hintPopup.parentNode.removeChild(hintPopup);
+                }
+            }, 8000);
+            
+            // Desactivar botón de pista temporalmente
+            document.getElementById('hintBtn').disabled = true;
+            setTimeout(() => {
+                document.getElementById('hintBtn').disabled = false;
+            }, 10000);
+        }
+
+        // ===== SISTEMA DE SONIDO =====
+        function playSound(type) {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                switch(type) {
+                    case 'success':
+                        oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime);
+                        oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1);
+                        oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2);
+                        break;
+                    case 'error':
+                        oscillator.frequency.setValueAtTime(220, audioContext.currentTime);
+                        oscillator.frequency.setValueAtTime(196, audioContext.currentTime + 0.1);
+                        break;
+                    case 'levelup':
+                        oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime);
+                        oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1);
+                        oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2);
+                        oscillator.frequency.setValueAtTime(1046.50, audioContext.currentTime + 0.3);
+                        break;
+                    default:
+                        oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+                }
+                
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.3);
+            } catch (error) {
+                console.log(`🔊 ${type} sound played (silent fallback)`);
+            }
+        }
+
+        // ===== GUARDADO Y CARGA =====
+        function saveProgress() {
+            const progress = {
+                score: gameState.score,
+                coins: gameState.coins,
+                level: gameState.level,
+                streak: gameState.streak,
+                playerPosition: gameState.playerPosition,
+                timestamp: Date.now()
+            };
+            
+            localStorage.setItem('englishAdventureProgress', JSON.stringify(progress));
+            
+            // Sincronizar con sistema global si existe
+            if (typeof window.updateSubjectProgress === 'function') {
+                window.updateSubjectProgress('ingles', {
+                    score: gameState.score,
+                    level: gameState.level,
+                    coins: gameState.coins,
+                    completed: gameState.level > 3
+                });
+            }
+        }
+
+        function loadProgress() {
+            const saved = localStorage.getItem('englishAdventureProgress');
+            if (saved) {
+                try {
+                    const progress = JSON.parse(saved);
+                    gameState.score = progress.score || 0;
+                    gameState.coins = progress.coins || 0;
+                    gameState.level = progress.level || 1;
+                    gameState.streak = progress.streak || 0;
+                    gameState.playerPosition = progress.playerPosition || { x: 600, y: 400 };
+                    
+                    // Actualizar posición del jugador
+                    const player = document.getElementById('player');
+                    player.style.left = gameState.playerPosition.x + 'px';
+                    player.style.top = gameState.playerPosition.y + 'px';
+                    
+                    updateHUD();
+                    console.log('📂 Progreso cargado:', progress);
+                } catch (error) {
+                    console.error('❌ Error al cargar progreso:', error);
+                }
+            }
+            
+            // Cargar monedas del sistema global
+            const globalCoins = localStorage.getItem('totalCoins');
+            if (globalCoins && !saved) {
+                // Si no hay progreso local pero sí monedas globales, inicializar
+                gameState.coins = Math.floor(parseInt(globalCoins) * 0.1); // 10% de las monedas globales
+                updateHUD();
+            }
+        }
+
+        // ===== BUCLE PRINCIPAL =====
+        function gameLoop() {
+            updatePlayer();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // ===== EVENTOS GLOBALES =====
+        window.addEventListener('load', () => {
+            console.log('🎮 English Adventure World cargado');
+            initGame();
+            
+            // Prevenir zoom en móviles
+            document.addEventListener('touchstart', (e) => {
+                if (e.touches.length > 1) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+            
+            // Prevenir scroll
+            document.addEventListener('touchmove', (e) => {
+                if (document.getElementById('gameModal').classList.contains('active')) {
+                    return; // Permitir scroll en el modal
+                }
+                e.preventDefault();
+            }, { passive: false });
+            
+            // Cerrar modal al hacer clic fuera
+            document.getElementById('gameModal').addEventListener('click', (e) => {
+                if (e.target.id === 'gameModal') {
+                    closeGame();
+                }
+            });
+            
+            // Atajos de teclado
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'h' || e.key === 'H') {
+                    if (document.getElementById('gameModal').classList.contains('active')) {
+                        showHint();
+                    }
+                }
+            });
+        });
+
+        window.addEventListener('beforeunload', () => {
+            saveProgress();
+        });
+
+        // Guardar progreso cada 30 segundos
+        setInterval(() => {
+            if (gameState.score > 0) {
+                saveProgress();
+            }
+        }, 30000);
+
+        // ===== FUNCIONES DE DEPURACIÓN =====
+        function debugGame() {
+            console.log('🐛 ESTADO DEL JUEGO:');
+            console.log('Posición del jugador:', gameState.playerPosition);
+            console.log('Zona cercana:', gameState.nearZone);
+            console.log('Zona actual:', gameState.currentZone);
+            console.log('Puntuación:', gameState.score);
+            console.log('Monedas:', gameState.coins);
+            console.log('Nivel:', gameState.level);
+            console.log('Racha:', gameState.streak);
+            console.log('Estadísticas de sesión:', gameState.sessionStats);
+        }
+
+        function addTestScore(points = 100) {
+            console.log(`⭐ Agregando ${points} puntos de prueba`);
+            addScore(points);
+        }
+
+        function addTestCoins(coins = 50) {
+            console.log(`🪙 Agregando ${coins} monedas de prueba`);
+            addCoins(coins);
+        }
+
+        function teleportToZone(zoneName) {
+            const zones = {
+                vocabulary: { x: 260, y: 210 },
+                grammar: { x: 940, y: 210 },
+                listening: { x: 260, y: 590 },
+                speaking: { x: 940, y: 590 },
+                reading: { x: 600, y: 400 }
+            };
+            
+            if (zones[zoneName]) {
+                gameState.playerPosition = zones[zoneName];
+                const player = document.getElementById('player');
+                player.style.left = gameState.playerPosition.x + 'px';
+                player.style.top = gameState.playerPosition.y + 'px';
+                console.log(`🚀 Teletransportado a zona: ${zoneName}`);
+            }
+        }
+
+        function unlockAllZones() {
+            console.log('🔓 Modo debug activado');
+            gameState.level = 10;
+            gameState.score = 1000;
+            gameState.coins = 500;
+            updateHUD();
+        }
+
+        function skipQuestion() {
+            if (gameState.currentGame) {
+                console.log('⏭️ Saltando pregunta actual');
+                document.getElementById('nextBtn').disabled = false;
+                nextQuestion();
+            }
+        }
+
+        function completeZone() {
+            if (gameState.currentGame) {
+                console.log('🏁 Completando zona actual');
+                gameState.gameProgress = gameState.currentGame.exercises.length - 1;
+                completeGame();
+            }
+        }
+
+        // Hacer funciones disponibles globalmente
+        window.debugGame = debugGame;
+        window.addTestScore = addTestScore;
+        window.addTestCoins = addTestCoins;
+        window.teleportToZone = teleportToZone;
+        window.unlockAllZones = unlockAllZones;
+        window.skipQuestion = skipQuestion;
+        window.completeZone = completeZone;
+        window.saveProgress = saveProgress;
+        window.loadProgress = loadProgress;
+        window.showHint = showHint;
+
+        console.log('🎮 English Adventure World - Versión Completa Mejorada');
+        console.log('✨ Características implementadas:');
+        console.log('  - 🌍 Mundo 3D navegable con 5 zonas');
+        console.log('  - 📚 Más de 60 ejercicios variados');
+        console.log('  - 🪙 Sistema completo de monedas');
+        console.log('  - 🏆 Sistema de niveles y logros');
+        console.log('  - 🔊 Síntesis de voz para pronunciación');
+        console.log('  - 💡 Sistema de pistas inteligentes');
+        console.log('  - 📊 Estadísticas detalladas');
+        console.log('  - 💾 Guardado automático');
+        console.log('  - 📱 Controles móviles optimizados');
+        console.log('  - 🏠 Botón de regreso al menú principal');
+        
+        console.log('🎯 Zonas de aprendizaje:');
+        console.log('  - 📚 Vocabulary: Palabras, colores, animales, comida, familia');
+        console.log('  - 📝 Grammar: Verbo to be, presente simple, artículos, plurales');
+        console.log('  - 🎧 Listening: Comprensión auditiva y dictados');
+        console.log('  - 🎤 Speaking: Pronunciación y descripción');
+        console.log('  - 📖 Reading: Comprensión lectora con textos variados');
+        
+        console.log('🕹️ Controles:');
+        console.log('  - WASD/Flechas: Mover personaje');
+        console.log('  - ESPACIO/ENTER: Entrar a zona');
+        console.log('  - ESC: Salir del juego');
+        console.log('  - H: Mostrar pista (en juego)');
+        console.log('  - Móvil: Joystick + botón de acción');
+        
+        console.log('🛠️ Funciones de depuración:');
+        console.log('  - debugGame() - Ver estado completo');
+        console.log('  - addTestScore(puntos) - Agregar puntos');
+        console.log('  - addTestCoins(monedas) - Agregar monedas');
+        console.log('  - teleportToZone("nombre") - Teletransportarse');
+        console.log('  - unlockAllZones() - Modo debug');
+        console.log('  - skipQuestion() - Saltar pregunta');
+        console.log('  - completeZone() - Completar zona');
+        
+        console.log('🎮 ¡Explora, aprende y gana monedas para comprar personajes!');
+    </script>
+</body>
+</html>

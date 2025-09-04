@@ -1,0 +1,2319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mundo de Aprendizaje - Aventura Educativa</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        :root {
+            --primary-color: #ff6b6b;
+            --secondary-color: #4ecdc4;
+            --accent-color: #45b7d1;
+            --success-color: #00b894;
+            --warning-color: #fdcb6e;
+            --purple-color: #a29bfe;
+            --orange-color: #fd79a8;
+            --coin-color: #f39c12;
+            --background-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 248, 255, 0.95));
+            --text-light: #ffffff;
+            --text-dark: #2d3436;
+            --shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: var(--background-gradient);
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, rgba(0,0,0,0.9), rgba(45, 52, 54, 0.9));
+            backdrop-filter: blur(15px);
+            padding: 1rem 2rem;
+            z-index: 100;
+            border-bottom: 3px solid rgba(78, 205, 196, 0.3);
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header-title {
+            color: var(--text-light);
+            font-size: 2.2rem;
+            font-weight: bold;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
+            background: linear-gradient(45deg, #fff, var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-stats {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .coin-display {
+            background: linear-gradient(45deg, var(--coin-color), #e67e22);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+            animation: coinGlow 2s infinite;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .back-button {
+            background: linear-gradient(45deg, var(--primary-color), var(--orange-color));
+            color: white;
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .back-button:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.6);
+        }
+
+        /* Contenedor del mundo 3D */
+        .world-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        #world3d {
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+        }
+
+        #world3d:active {
+            cursor: grabbing;
+        }
+
+        /* Panel de información */
+        .info-panel {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--card-gradient);
+            border-radius: 25px;
+            padding: 1.5rem 2rem;
+            box-shadow: var(--shadow);
+            border: 3px solid rgba(78, 205, 196, 0.4);
+            backdrop-filter: blur(15px);
+            z-index: 50;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .info-title {
+            font-size: 1.5rem;
+            color: var(--text-dark);
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-description {
+            font-size: 1rem;
+            color: #636e72;
+            line-height: 1.4;
+        }
+
+        /* Modal de materia */
+        .subject-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .subject-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: var(--card-gradient);
+            border-radius: 25px;
+            padding: 3rem;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.4);
+            border: 3px solid rgba(78, 205, 196, 0.4);
+            animation: modalSlideIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modal-content::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: modalShine 4s infinite;
+        }
+
+        .modal-icon {
+            font-size: 5rem;
+            margin-bottom: 1.5rem;
+            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
+            animation: iconBounce 2s infinite;
+        }
+
+        .modal-title {
+            font-size: 2.5rem;
+            color: var(--text-dark);
+            font-weight: bold;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-description {
+            font-size: 1.2rem;
+            color: #636e72;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+
+        .modal-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 2rem;
+        }
+
+        .modal-stat {
+            background: rgba(255, 255, 255, 0.7);
+            padding: 1rem;
+            border-radius: 15px;
+            border: 2px solid rgba(78, 205, 196, 0.3);
+        }
+
+        .modal-stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--text-dark);
+            display: block;
+        }
+
+        .modal-stat-label {
+            font-size: 0.9rem;
+            color: #636e72;
+            margin-top: 0.3rem;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .modal-btn {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .modal-btn.play {
+            background: linear-gradient(45deg, var(--success-color), #55efc4);
+            color: white;
+        }
+
+        .modal-btn.close {
+            background: linear-gradient(45deg, var(--primary-color), #d63031);
+            color: white;
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Controles de cámara */
+        .camera-controls {
+            position: fixed;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 50;
+        }
+
+        .control-btn {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(45deg, var(--secondary-color), var(--accent-color));
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .control-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(78, 205, 196, 0.6);
+        }
+
+        /* Minimapa */
+        .minimap {
+            position: fixed;
+            top: 100px;
+            left: 20px;
+            width: 150px;
+            height: 150px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 50%;
+            border: 3px solid rgba(78, 205, 196, 0.6);
+            z-index: 50;
+            overflow: hidden;
+        }
+
+        .minimap-content {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: radial-gradient(circle, #4ecdc4, #45b7d1);
+        }
+
+        .minimap-dot {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+            animation: minimapPulse 2s infinite;
+        }
+
+        /* Animaciones */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateX(-50%) translateY(50px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        @keyframes modalSlideIn {
+            from { opacity: 0; transform: scale(0.8) translateY(-50px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        @keyframes modalShine {
+            0% { transform: rotate(45deg) translate(-200%, -200%); }
+            50% { transform: rotate(45deg) translate(-50%, -50%); }
+            100% { transform: rotate(45deg) translate(200%, 200%); }
+        }
+
+        @keyframes iconBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes coinGlow {
+            0%, 100% { box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); }
+            50% { box-shadow: 0 12px 30px rgba(243, 156, 18, 0.6); }
+        }
+
+        @keyframes minimapPulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-title {
+                font-size: 1.8rem;
+            }
+
+            .coin-display {
+                font-size: 1rem;
+                padding: 10px 15px;
+            }
+
+            .modal-content {
+                padding: 2rem;
+                margin: 1rem;
+            }
+
+            .modal-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-buttons {
+                flex-direction: column;
+            }
+
+            .camera-controls {
+                right: 10px;
+            }
+
+            .minimap {
+                width: 100px;
+                height: 100px;
+                left: 10px;
+            }
+
+            .info-panel {
+                bottom: 10px;
+                padding: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .modal-title {
+                font-size: 2rem;
+            }
+
+            .modal-icon {
+                font-size: 4rem;
+            }
+
+            .control-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+        }
+
+                /* Loading screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-icon {
+            font-size: 5rem;
+            margin-bottom: 2rem;
+            animation: loadingRotate 2s infinite;
+        }
+
+        .loading-text {
+            font-size: 1.5rem;
+            color: white;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .loading-bar {
+            width: 300px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+
+        .loading-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #4ecdc4, #45b7d1);
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        @keyframes loadingRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-icon">🌍</div>
+        <div class="loading-text">Cargando Mundo de Aprendizaje...</div>
+        <div class="loading-bar">
+            <div class="loading-progress" id="loadingProgress"></div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <h1 class="header-title">🌍 Mundo de Aprendizaje</h1>
+            <div class="header-stats">
+                <div class="coin-display">
+                    <span>🪙</span>
+                    <span id="playerCoins">0</span>
+                    <span>Monedas</span>
+                </div>
+                <button class="back-button" onclick="goBack()">
+                    🔙 Volver al Menú
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor del mundo 3D -->
+    <div class="world-container">
+        <canvas id="world3d"></canvas>
+    </div>
+
+    <!-- Controles de cámara -->
+    <div class="camera-controls">
+        <button class="control-btn" onclick="resetCamera()" title="Resetear Vista">
+            🏠
+        </button>
+        <button class="control-btn" onclick="zoomIn()" title="Acercar">
+            🔍
+        </button>
+        <button class="control-btn" onclick="zoomOut()" title="Alejar">
+            🔍
+        </button>
+        <button class="control-btn" onclick="toggleAutoRotate()" title="Auto Rotación">
+            🔄
+        </button>
+    </div>
+
+    <!-- Minimapa -->
+    <div class="minimap">
+        <div class="minimap-content" id="minimapContent">
+            <!-- Los puntos se generarán dinámicamente -->
+        </div>
+    </div>
+
+    <!-- Panel de información -->
+    <div class="info-panel">
+        <div class="info-title">🎮 ¡Explora el Mundo del Conocimiento!</div>
+        <div class="info-description">
+            Haz clic en las casas coloridas para acceder a diferentes materias. 
+            Arrastra para rotar el mundo y descubre todas las aventuras educativas.
+        </div>
+    </div>
+
+    <!-- Modal de materia -->
+    <div class="subject-modal" id="subjectModal">
+        <div class="modal-content">
+            <div class="modal-icon" id="modalIcon">🏠</div>
+            <h2 class="modal-title" id="modalTitle">Materia</h2>
+            <p class="modal-description" id="modalDescription">Descripción de la materia</p>
+            
+            <div class="modal-stats">
+                <div class="modal-stat">
+                    <span class="modal-stat-value" id="modalLevel">1</span>
+                    <div class="modal-stat-label">Nivel</div>
+                </div>
+                <div class="modal-stat">
+                    <span class="modal-stat-value" id="modalScore">0</span>
+                    <div class="modal-stat-label">Puntuación</div>
+                </div>
+                <div class="modal-stat">
+                    <span class="modal-stat-value" id="modalProgress">0%</span>
+                    <div class="modal-stat-label">Progreso</div>
+                </div>
+            </div>
+            
+            <div class="modal-buttons">
+                <button class="modal-btn play" onclick="playSubject()">
+                    🎮 ¡Jugar!
+                </button>
+                <button class="modal-btn close" onclick="closeModal()">
+                    ❌ Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let scene, camera, renderer, controls;
+        let houses = [];
+        let currentSubject = null;
+        let playerCoins = 0;
+        let isAutoRotating = false;
+        let loadingProgress = 0;
+
+        // Configuración de materias
+        const subjects = {
+            matematicas: {
+                name: 'Matemáticas',
+                icon: '🔢',
+                description: '¡Descubre el fascinante mundo de los números! Resuelve problemas, aprende operaciones y conviértete en un maestro matemático.',
+                color: 0x45b7d1,
+                position: { x: 8, y: 0, z: 8 },
+                url: 'mategame1.html'
+            },
+            lengua: {
+                name: 'Lengua y Literatura',
+                icon: '📖',
+                description: '¡Explora el poder de las palabras! Mejora tu lectura, escritura y comprensión en aventuras literarias increíbles.',
+                color: 0xa29bfe,
+                position: { x: -8, y: 0, z: 8 },
+                url: 'lengua.html'
+            },
+            ciencias: {
+                name: 'Ciencias Naturales',
+                icon: '🔬',
+                description: '¡Investiga los misterios del universo! Experimenta, descubre y aprende sobre la naturaleza que nos rodea.',
+                color: 0x00b894,
+                position: { x: 8, y: 0, z: -8 },
+                url: 'ciencias.html'
+            },
+            sociales: {
+                name: 'Ciencias Sociales',
+                icon: '🌍',
+                description: '¡Viaja por el mundo y la historia! Conoce culturas, países y eventos que han marcado la humanidad.',
+                color: 0xfdcb6e,
+                position: { x: -8, y: 0, z: -8 },
+                url: 'sociales.html'
+            },
+            ingles: {
+                name: 'Inglés',
+                icon: '🇬🇧',
+                description: '¡Aprende el idioma universal! Practica vocabulario, gramática y conversación de manera divertida.',
+                color: 0xff6b6b,
+                position: { x: 12, y: 0, z: 0 },
+                url: 'ingles2.html'
+            },
+            arte: {
+                name: 'Arte',
+                icon: '🎨',
+                description: '¡Libera tu creatividad! Pinta, dibuja y crea obras maestras mientras aprendes sobre grandes artistas.',
+                color: 0xfd79a8,
+                position: { x: -12, y: 0, z: 0 },
+                url: 'arte.html'
+            },
+            educacion_fisica: {
+                name: 'Educación Física',
+                icon: '⚽',
+                description: '¡Muévete y diviértete! Aprende sobre deportes, salud y mantén tu cuerpo activo y saludable.',
+                color: 0x55efc4,
+                position: { x: 0, y: 0, z: 12 },
+                url: 'educacion-fisica.html'
+            },
+            musica: {
+                name: 'Música',
+                icon: '🎵',
+                description: '¡Descubre el ritmo que llevas dentro! Aprende sobre instrumentos, notas y crea tus propias melodías.',
+                color: 0x6c5ce7,
+                position: { x: 0, y: 0, z: -12 },
+                url: 'musica.html'
+            }
+        };
+
+        // Inicializar el mundo 3D
+        function initWorld() {
+            console.log('🌍 Inicializando mundo 3D...');
+            
+            // Crear escena
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x87CEEB); // Color cielo
+
+            // Crear cámara
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 15, 20);
+
+            // Crear renderer
+            const canvas = document.getElementById('world3d');
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+            // Crear controles
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.maxPolarAngle = Math.PI / 2.2;
+            controls.minDistance = 10;
+            controls.maxDistance = 50;
+
+            // Crear iluminación
+            createLighting();
+
+            // Crear terreno
+            createTerrain();
+
+            // Crear casas de materias
+            createSubjectHouses();
+
+            // Crear decoraciones
+            createDecorations();
+
+            // Configurar eventos
+            setupEvents();
+
+            // Iniciar animación
+            animate();
+
+            console.log('✅ Mundo 3D inicializado');
+        }
+
+        // Crear iluminación
+        function createLighting() {
+            // Luz ambiental
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+
+            // Luz direccional (sol)
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(50, 50, 50);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 2048;
+            directionalLight.shadow.mapSize.height = 2048;
+            directionalLight.shadow.camera.near = 0.5;
+            directionalLight.shadow.camera.far = 500;
+            directionalLight.shadow.camera.left = -50;
+            directionalLight.shadow.camera.right = 50;
+            directionalLight.shadow.camera.top = 50;
+            directionalLight.shadow.camera.bottom = -50;
+            scene.add(directionalLight);
+
+            // Luces de colores para ambiente
+            const colors = [0xff6b6b, 0x4ecdc4, 0x45b7d1, 0xa29bfe];
+            colors.forEach((color, index) => {
+                const light = new THREE.PointLight(color, 0.3, 30);
+                const angle = (index / colors.length) * Math.PI * 2;
+                light.position.set(
+                    Math.cos(angle) * 20,
+                    5,
+                    Math.sin(angle) * 20
+                );
+                scene.add(light);
+            });
+        }
+
+        // Crear terreno
+        function createTerrain() {
+            // Suelo principal
+            const groundGeometry = new THREE.CircleGeometry(25, 32);
+            const groundMaterial = new THREE.MeshLambertMaterial({ 
+                color: 0x90EE90,
+                transparent: true,
+                opacity: 0.8
+            });
+            const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+            ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
+            scene.add(ground);
+
+            // Caminos
+            createPaths();
+
+            // Césped decorativo
+            createGrass();
+        }
+
+        // Crear caminos
+        function createPaths() {
+            const pathMaterial = new THREE.MeshLambertMaterial({ color: 0xDEB887 });
+            
+            // Camino central en cruz
+            const pathGeometry1 = new THREE.PlaneGeometry(2, 30);
+            const path1 = new THREE.Mesh(pathGeometry1, pathMaterial);
+            path1.rotation.x = -Math.PI / 2;
+            path1.position.y = 0.01;
+            scene.add(path1);
+
+            const pathGeometry2 = new THREE.PlaneGeometry(30, 2);
+            const path2 = new THREE.Mesh(pathGeometry2, pathMaterial);
+            path2.rotation.x = -Math.PI / 2;
+            path2.position.y = 0.01;
+            scene.add(path2);
+
+            // Caminos diagonales
+            const diagonalPaths = [
+                { rotation: Math.PI / 4, position: { x: 6, z: 6 } },
+                { rotation: -Math.PI / 4, position: { x: -6, z: 6 } },
+                { rotation: 3 * Math.PI / 4, position: { x: -6, z: -6 } },
+                { rotation: -3 * Math.PI / 4, position: { x: 6, z: -6 } }
+            ];
+
+            diagonalPaths.forEach(pathData => {
+                const diagonalGeometry = new THREE.PlaneGeometry(1.5, 12);
+                const diagonalPath = new THREE.Mesh(diagonalGeometry, pathMaterial);
+                diagonalPath.rotation.x = -Math.PI / 2;
+                diagonalPath.rotation.z = pathData.rotation;
+                diagonalPath.position.set(pathData.position.x, 0.01, pathData.position.z);
+                scene.add(diagonalPath);
+            });
+        }
+
+        // Crear césped decorativo
+        function createGrass() {
+            const grassGeometry = new THREE.ConeGeometry(0.1, 0.5, 3);
+            const grassMaterial = new THREE.MeshLambertMaterial({ color: 0x228B22 });
+
+            for (let i = 0; i < 100; i++) {
+                const grass = new THREE.Mesh(grassGeometry, grassMaterial);
+                const angle = Math.random() * Math.PI * 2;
+                                const distance = 5 + Math.random() * 15;
+                grass.position.set(
+                    Math.cos(angle) * distance,
+                    0.25,
+                    Math.sin(angle) * distance
+                );
+                grass.rotation.y = Math.random() * Math.PI * 2;
+                grass.scale.set(
+                    0.5 + Math.random() * 0.5,
+                    0.5 + Math.random() * 0.5,
+                    0.5 + Math.random() * 0.5
+                );
+                scene.add(grass);
+            }
+        }
+
+        // Crear casas de materias
+        function createSubjectHouses() {
+            Object.keys(subjects).forEach((subjectKey, index) => {
+                const subject = subjects[subjectKey];
+                const house = createHouse(subject, subjectKey);
+                houses.push({ mesh: house, subject: subjectKey, data: subject });
+                
+                // Actualizar progreso de carga
+                updateLoadingProgress((index + 1) / Object.keys(subjects).length * 70 + 20);
+            });
+        }
+
+        // Crear una casa individual
+        function createHouse(subject, subjectKey) {
+            const group = new THREE.Group();
+
+            // Base de la casa
+            const baseGeometry = new THREE.BoxGeometry(3, 2, 3);
+            const baseMaterial = new THREE.MeshLambertMaterial({ color: subject.color });
+            const base = new THREE.Mesh(baseGeometry, baseMaterial);
+            base.position.y = 1;
+            base.castShadow = true;
+            base.receiveShadow = true;
+            group.add(base);
+
+            // Techo
+            const roofGeometry = new THREE.ConeGeometry(2.5, 1.5, 4);
+            const roofMaterial = new THREE.MeshLambertMaterial({ color: 0x8B4513 });
+            const roof = new THREE.Mesh(roofGeometry, roofMaterial);
+            roof.position.y = 2.75;
+            roof.rotation.y = Math.PI / 4;
+            roof.castShadow = true;
+            group.add(roof);
+
+            // Puerta
+            const doorGeometry = new THREE.BoxGeometry(0.8, 1.5, 0.1);
+            const doorMaterial = new THREE.MeshLambertMaterial({ color: 0x654321 });
+            const door = new THREE.Mesh(doorGeometry, doorMaterial);
+            door.position.set(0, 0.75, 1.55);
+            group.add(door);
+
+            // Ventanas
+            const windowGeometry = new THREE.BoxGeometry(0.6, 0.6, 0.1);
+            const windowMaterial = new THREE.MeshLambertMaterial({ color: 0x87CEEB });
+            
+            const window1 = new THREE.Mesh(windowGeometry, windowMaterial);
+            window1.position.set(-0.8, 1.2, 1.55);
+            group.add(window1);
+
+            const window2 = new THREE.Mesh(windowGeometry, windowMaterial);
+            window2.position.set(0.8, 1.2, 1.55);
+            group.add(window2);
+
+            // Chimenea
+            const chimneyGeometry = new THREE.BoxGeometry(0.4, 1, 0.4);
+            const chimneyMaterial = new THREE.MeshLambertMaterial({ color: 0x696969 });
+            const chimney = new THREE.Mesh(chimneyGeometry, chimneyMaterial);
+            chimney.position.set(1, 3.5, -1);
+            chimney.castShadow = true;
+            group.add(chimney);
+
+            // Decoraciones especiales por materia
+            addSubjectDecorations(group, subjectKey, subject);
+
+            // Posicionar la casa
+            group.position.set(subject.position.x, 0, subject.position.z);
+            
+            // Animación de flotación sutil
+            group.userData = { 
+                originalY: 0, 
+                subject: subjectKey,
+                animationOffset: Math.random() * Math.PI * 2
+            };
+
+            scene.add(group);
+            return group;
+        }
+
+        // Agregar decoraciones específicas por materia
+        function addSubjectDecorations(group, subjectKey, subject) {
+            switch(subjectKey) {
+                case 'matematicas':
+                    // Números flotantes
+                    createFloatingNumbers(group);
+                    break;
+                case 'ciencias':
+                    // Átomos giratorios
+                    createAtoms(group);
+                    break;
+                case 'arte':
+                    // Paleta de colores
+                    createColorPalette(group);
+                    break;
+                case 'musica':
+                    // Notas musicales
+                    createMusicalNotes(group);
+                    break;
+                case 'educacion_fisica':
+                    // Pelotas deportivas
+                    createSportsBalls(group);
+                    break;
+                case 'lengua':
+                    // Libros flotantes
+                    createFloatingBooks(group);
+                    break;
+                case 'sociales':
+                    // Globo terráqueo
+                    createGlobe(group);
+                    break;
+                case 'ingles':
+                    // Banderas
+                    createFlags(group);
+                    break;
+            }
+        }
+
+        // Decoraciones específicas para matemáticas
+        function createFloatingNumbers(group) {
+            const numbers = ['1', '2', '3', '+', '='];
+            numbers.forEach((num, index) => {
+                const canvas = document.createElement('canvas');
+                canvas.width = 64;
+                canvas.height = 64;
+                const context = canvas.getContext('2d');
+                context.fillStyle = '#ffffff';
+                context.font = '48px Arial';
+                context.textAlign = 'center';
+                context.fillText(num, 32, 48);
+
+                const texture = new THREE.CanvasTexture(canvas);
+                const material = new THREE.SpriteMaterial({ map: texture });
+                const sprite = new THREE.Sprite(material);
+                sprite.scale.set(0.5, 0.5, 1);
+                sprite.position.set(
+                    (index - 2) * 0.8,
+                    3 + Math.sin(index) * 0.5,
+                    0
+                );
+                sprite.userData = { animationOffset: index * 0.5 };
+                group.add(sprite);
+            });
+        }
+
+        // Decoraciones para ciencias
+        function createAtoms(group) {
+            const atomGroup = new THREE.Group();
+            
+            // Núcleo
+            const nucleusGeometry = new THREE.SphereGeometry(0.1, 8, 8);
+            const nucleusMaterial = new THREE.MeshLambertMaterial({ color: 0xff0000 });
+            const nucleus = new THREE.Mesh(nucleusGeometry, nucleusMaterial);
+            atomGroup.add(nucleus);
+
+            // Electrones
+            for (let i = 0; i < 3; i++) {
+                const electronGeometry = new THREE.SphereGeometry(0.05, 8, 8);
+                const electronMaterial = new THREE.MeshLambertMaterial({ color: 0x0000ff });
+                const electron = new THREE.Mesh(electronGeometry, electronMaterial);
+                
+                const orbit = new THREE.Group();
+                electron.position.set(0.5, 0, 0);
+                orbit.add(electron);
+                orbit.rotation.z = (i / 3) * Math.PI * 2;
+                orbit.userData = { rotationSpeed: 0.02 + i * 0.01 };
+                atomGroup.add(orbit);
+            }
+
+            atomGroup.position.set(0, 4, 0);
+            atomGroup.scale.set(2, 2, 2);
+            group.add(atomGroup);
+        }
+
+        // Decoraciones para arte
+        function createColorPalette(group) {
+            const colors = [0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0xff00ff];
+            colors.forEach((color, index) => {
+                const paletteGeometry = new THREE.CylinderGeometry(0.1, 0.1, 0.05, 8);
+                const paletteMaterial = new THREE.MeshLambertMaterial({ color: color });
+                const palette = new THREE.Mesh(paletteGeometry, paletteMaterial);
+                palette.position.set(
+                    (index - 2) * 0.3,
+                    3.5,
+                    1
+                );
+                group.add(palette);
+            });
+        }
+
+        // Decoraciones para música
+        function createMusicalNotes(group) {
+            const notePositions = [
+                { x: -1, y: 3.5, z: 0 },
+                { x: -0.5, y: 4, z: 0 },
+                { x: 0, y: 3.8, z: 0 },
+                { x: 0.5, y: 4.2, z: 0 },
+                { x: 1, y: 3.9, z: 0 }
+            ];
+
+            notePositions.forEach((pos, index) => {
+                const noteGeometry = new THREE.SphereGeometry(0.1, 8, 8);
+                const noteMaterial = new THREE.MeshLambertMaterial({ color: 0x000000 });
+                const note = new THREE.Mesh(noteGeometry, noteMaterial);
+                note.position.set(pos.x, pos.y, pos.z);
+                note.userData = { animationOffset: index * 0.3 };
+                group.add(note);
+            });
+        }
+
+        // Decoraciones para educación física
+        function createSportsBalls(group) {
+            const ballGeometry = new THREE.SphereGeometry(0.15, 8, 8);
+            const ballMaterials = [
+                new THREE.MeshLambertMaterial({ color: 0xff6600 }), // Baloncesto
+                new THREE.MeshLambertMaterial({ color: 0x000000 }), // Fútbol
+                new THREE.MeshLambertMaterial({ color: 0xffff00 })  // Tenis
+            ];
+
+            ballMaterials.forEach((material, index) => {
+                const ball = new THREE.Mesh(ballGeometry, material);
+                ball.position.set(
+                    (index - 1) * 0.8,
+                    3.5 + Math.sin(index) * 0.2,
+                    0.5
+                );
+                ball.userData = { 
+                    animationOffset: index * 0.7,
+                    bounceSpeed: 0.02 + index * 0.01
+                };
+                group.add(ball);
+            });
+        }
+
+        // Decoraciones para lengua
+        function createFloatingBooks(group) {
+            for (let i = 0; i < 3; i++) {
+                const bookGeometry = new THREE.BoxGeometry(0.3, 0.4, 0.05);
+                const bookColors = [0x8B4513, 0x006400, 0x4B0082];
+                const bookMaterial = new THREE.MeshLambertMaterial({ color: bookColors[i] });
+                const book = new THREE.Mesh(bookGeometry, bookMaterial);
+                book.position.set(
+                    (i - 1) * 0.5,
+                    3.5 + i * 0.2,
+                    0.8
+                );
+                book.rotation.y = (i - 1) * 0.3;
+                book.userData = { animationOffset: i * 0.4 };
+                group.add(book);
+            }
+        }
+
+        // Decoraciones para sociales
+        function createGlobe(group) {
+            const globeGeometry = new THREE.SphereGeometry(0.3, 16, 16);
+            const globeMaterial = new THREE.MeshLambertMaterial({ color: 0x4169E1 });
+            const globe = new THREE.Mesh(globeGeometry, globeMaterial);
+            globe.position.set(0, 4, 0);
+            globe.userData = { rotationSpeed: 0.01 };
+            group.add(globe);
+
+            // Continentes (simplificados)
+            const continentGeometry = new THREE.SphereGeometry(0.31, 8, 8);
+            const continentMaterial = new THREE.MeshLambertMaterial({ color: 0x228B22 });
+            const continent = new THREE.Mesh(continentGeometry, continentMaterial);
+            continent.position.set(0, 4, 0);
+            group.add(continent);
+        }
+
+        // Decoraciones para inglés
+        function createFlags(group) {
+            const flagGeometry = new THREE.PlaneGeometry(0.4, 0.3);
+            const flagMaterial = new THREE.MeshLambertMaterial({ 
+                color: 0xff0000,
+                side: THREE.DoubleSide
+            });
+            const flag = new THREE.Mesh(flagGeometry, flagMaterial);
+            flag.position.set(0.8, 3.5, 0);
+            flag.userData = { waveOffset: 0 };
+            group.add(flag);
+        }
+
+        // Crear decoraciones del mundo
+        function createDecorations() {
+            // Árboles
+            createTrees();
+            
+            // Flores
+            createFlowers();
+            
+            // Nubes
+            createClouds();
+            
+            // Partículas flotantes
+            createParticles();
+
+            updateLoadingProgress(95);
+        }
+
+        // Crear árboles
+        function createTrees() {
+            const treePositions = [
+                { x: 15, z: 15 }, { x: -15, z: 15 }, { x: 15, z: -15 }, { x: -15, z: -15 },
+                { x: 20, z: 0 }, { x: -20, z: 0 }, { x: 0, z: 20 }, { x: 0, z: -20 }
+            ];
+
+            treePositions.forEach(pos => {
+                const tree = new THREE.Group();
+
+                // Tronco
+                const trunkGeometry = new THREE.CylinderGeometry(0.3, 0.4, 3, 8);
+                const trunkMaterial = new THREE.MeshLambertMaterial({ color: 0x8B4513 });
+                const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+                trunk.position.y = 1.5;
+                trunk.castShadow = true;
+                tree.add(trunk);
+
+                // Copa
+                const foliageGeometry = new THREE.SphereGeometry(2, 8, 8);
+                const foliageMaterial = new THREE.MeshLambertMaterial({ color: 0x228B22 });
+                const foliage = new THREE.Mesh(foliageGeometry, foliageMaterial);
+                foliage.position.y = 4;
+                foliage.castShadow = true;
+                tree.add(foliage);
+
+                tree.position.set(pos.x, 0, pos.z);
+                tree.userData = { swayOffset: Math.random() * Math.PI * 2 };
+                scene.add(tree);
+            });
+        }
+
+        // Crear flores
+        function createFlowers() {
+            for (let i = 0; i < 30; i++) {
+                const flower = new THREE.Group();
+
+                // Tallo
+                const stemGeometry = new THREE.CylinderGeometry(0.02, 0.02, 0.5, 4);
+                                const stemMaterial = new THREE.MeshLambertMaterial({ color: 0x228B22 });
+                const stem = new THREE.Mesh(stemGeometry, stemMaterial);
+                stem.position.y = 0.25;
+                flower.add(stem);
+
+                // Pétalos
+                const petalColors = [0xff69b4, 0xff1493, 0xffd700, 0xff4500, 0x9370db];
+                const petalColor = petalColors[Math.floor(Math.random() * petalColors.length)];
+                
+                for (let j = 0; j < 6; j++) {
+                    const petalGeometry = new THREE.SphereGeometry(0.1, 6, 6);
+                    const petalMaterial = new THREE.MeshLambertMaterial({ color: petalColor });
+                    const petal = new THREE.Mesh(petalGeometry, petalMaterial);
+                    const angle = (j / 6) * Math.PI * 2;
+                    petal.position.set(
+                        Math.cos(angle) * 0.15,
+                        0.5,
+                        Math.sin(angle) * 0.15
+                    );
+                    flower.add(petal);
+                }
+
+                // Centro
+                const centerGeometry = new THREE.SphereGeometry(0.05, 6, 6);
+                const centerMaterial = new THREE.MeshLambertMaterial({ color: 0xffff00 });
+                const center = new THREE.Mesh(centerGeometry, centerMaterial);
+                center.position.y = 0.5;
+                flower.add(center);
+
+                // Posición aleatoria
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 16 + Math.random() * 6;
+                flower.position.set(
+                    Math.cos(angle) * distance,
+                    0,
+                    Math.sin(angle) * distance
+                );
+                flower.userData = { swayOffset: Math.random() * Math.PI * 2 };
+                scene.add(flower);
+            }
+        }
+
+        // Crear nubes
+        function createClouds() {
+            for (let i = 0; i < 8; i++) {
+                const cloud = new THREE.Group();
+                
+                // Crear múltiples esferas para formar la nube
+                for (let j = 0; j < 5; j++) {
+                    const cloudGeometry = new THREE.SphereGeometry(1 + Math.random() * 0.5, 8, 8);
+                    const cloudMaterial = new THREE.MeshLambertMaterial({ 
+                        color: 0xffffff,
+                        transparent: true,
+                        opacity: 0.8
+                    });
+                    const cloudPart = new THREE.Mesh(cloudGeometry, cloudMaterial);
+                    cloudPart.position.set(
+                        (j - 2) * 1.5 + (Math.random() - 0.5),
+                        Math.random() * 0.5,
+                        (Math.random() - 0.5) * 2
+                    );
+                    cloud.add(cloudPart);
+                }
+
+                cloud.position.set(
+                    (Math.random() - 0.5) * 60,
+                    15 + Math.random() * 10,
+                    (Math.random() - 0.5) * 60
+                );
+                cloud.userData = { 
+                    driftSpeed: 0.01 + Math.random() * 0.02,
+                    driftDirection: Math.random() * Math.PI * 2
+                };
+                scene.add(cloud);
+            }
+        }
+
+        // Crear partículas flotantes
+        function createParticles() {
+            const particleGeometry = new THREE.BufferGeometry();
+            const particleCount = 100;
+            const positions = new Float32Array(particleCount * 3);
+            const colors = new Float32Array(particleCount * 3);
+
+            for (let i = 0; i < particleCount; i++) {
+                positions[i * 3] = (Math.random() - 0.5) * 50;
+                positions[i * 3 + 1] = Math.random() * 20 + 5;
+                positions[i * 3 + 2] = (Math.random() - 0.5) * 50;
+
+                const color = new THREE.Color();
+                color.setHSL(Math.random(), 0.7, 0.8);
+                colors[i * 3] = color.r;
+                colors[i * 3 + 1] = color.g;
+                colors[i * 3 + 2] = color.b;
+            }
+
+            particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            particleGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+            const particleMaterial = new THREE.PointsMaterial({
+                size: 0.1,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.8
+            });
+
+            const particles = new THREE.Points(particleGeometry, particleMaterial);
+            particles.userData = { rotationSpeed: 0.001 };
+            scene.add(particles);
+        }
+
+        // Configurar eventos
+        function setupEvents() {
+            // Redimensionar ventana
+            window.addEventListener('resize', onWindowResize);
+
+            // Click en casas
+            const raycaster = new THREE.Raycaster();
+            const mouse = new THREE.Vector2();
+
+            renderer.domElement.addEventListener('click', (event) => {
+                mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+                raycaster.setFromCamera(mouse, camera);
+                
+                const intersects = raycaster.intersectObjects(scene.children, true);
+                
+                if (intersects.length > 0) {
+                    const clickedObject = intersects[0].object;
+                    let house = null;
+
+                    // Buscar la casa padre
+                    let parent = clickedObject.parent;
+                    while (parent && !house) {
+                        const foundHouse = houses.find(h => h.mesh === parent);
+                        if (foundHouse) {
+                            house = foundHouse;
+                        }
+                        parent = parent.parent;
+                    }
+
+                    if (house) {
+                        openSubjectModal(house.subject);
+                        
+                        // Efecto visual al hacer click
+                        createClickEffect(intersects[0].point);
+                    }
+                }
+            });
+
+            // Actualizar minimapa
+            updateMinimap();
+        }
+
+        // Crear efecto visual al hacer click
+        function createClickEffect(position) {
+            const effectGeometry = new THREE.RingGeometry(0.5, 1, 8);
+            const effectMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0xffffff,
+                transparent: true,
+                opacity: 1
+            });
+            const effect = new THREE.Mesh(effectGeometry, effectMaterial);
+            effect.position.copy(position);
+            effect.position.y += 0.1;
+            effect.lookAt(camera.position);
+            scene.add(effect);
+
+            // Animar el efecto
+            const startTime = Date.now();
+            const animate = () => {
+                const elapsed = Date.now() - startTime;
+                const progress = elapsed / 1000;
+
+                if (progress < 1) {
+                    effect.scale.setScalar(1 + progress * 2);
+                    effect.material.opacity = 1 - progress;
+                    requestAnimationFrame(animate);
+                } else {
+                    scene.remove(effect);
+                }
+            };
+            animate();
+        }
+
+        // Actualizar minimapa
+        function updateMinimap() {
+            const minimapContent = document.getElementById('minimapContent');
+            minimapContent.innerHTML = '';
+
+            houses.forEach((house, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'minimap-dot';
+                
+                // Convertir posición 3D a posición 2D del minimapa
+                const x = (house.data.position.x / 25) * 75 + 75;
+                const z = (house.data.position.z / 25) * 75 + 75;
+                
+                dot.style.left = `${x}px`;
+                dot.style.top = `${z}px`;
+                dot.style.backgroundColor = `#${house.data.color.toString(16)}`;
+                dot.style.animationDelay = `${index * 0.2}s`;
+                
+                minimapContent.appendChild(dot);
+            });
+        }
+
+        // Animación principal
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const time = Date.now() * 0.001;
+
+            // Animar casas (flotación sutil)
+            houses.forEach(house => {
+                const mesh = house.mesh;
+                const userData = mesh.userData;
+                mesh.position.y = userData.originalY + Math.sin(time + userData.animationOffset) * 0.1;
+                mesh.rotation.y += 0.005;
+            });
+
+            // Animar decoraciones de casas
+            scene.traverse((object) => {
+                if (object.userData.rotationSpeed) {
+                    object.rotation.y += object.userData.rotationSpeed;
+                }
+                if (object.userData.animationOffset !== undefined) {
+                    if (object.type === 'Sprite') {
+                        object.position.y += Math.sin(time * 2 + object.userData.animationOffset) * 0.01;
+                    }
+                }
+                if (object.userData.bounceSpeed) {
+                    object.position.y += Math.sin(time * 3 + object.userData.animationOffset) * object.userData.bounceSpeed;
+                }
+                if (object.userData.swayOffset !== undefined) {
+                    object.rotation.z = Math.sin(time + object.userData.swayOffset) * 0.05;
+                }
+                if (object.userData.driftSpeed) {
+                    object.position.x += Math.cos(object.userData.driftDirection) * object.userData.driftSpeed;
+                    object.position.z += Math.sin(object.userData.driftDirection) * object.userData.driftSpeed;
+                }
+                if (object.userData.waveOffset !== undefined) {
+                    object.userData.waveOffset += 0.1;
+                    // Simular ondulación de bandera
+                    if (object.geometry && object.geometry.attributes.position) {
+                        const positions = object.geometry.attributes.position.array;
+                        for (let i = 0; i < positions.length; i += 3) {
+                            positions[i + 2] = Math.sin(positions[i] * 5 + object.userData.waveOffset) * 0.1;
+                        }
+                        object.geometry.attributes.position.needsUpdate = true;
+                    }
+                }
+            });
+
+            // Auto rotación si está activada
+            if (isAutoRotating) {
+                controls.autoRotate = true;
+                controls.autoRotateSpeed = 0.5;
+            } else {
+                controls.autoRotate = false;
+            }
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // Redimensionar ventana
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // Abrir modal de materia
+        function openSubjectModal(subjectKey) {
+            const subject = subjects[subjectKey];
+            const modal = document.getElementById('subjectModal');
+            
+            currentSubject = subjectKey;
+            
+            // Actualizar contenido del modal
+            document.getElementById('modalIcon').textContent = subject.icon;
+            document.getElementById('modalTitle').textContent = subject.name;
+            document.getElementById('modalDescription').textContent = subject.description;
+            
+            // Cargar estadísticas de la materia
+            loadSubjectStats(subjectKey);
+            
+            // Mostrar modal
+            modal.classList.add('show');
+            
+            // Efecto de sonido (si está disponible)
+            if (navigator.vibrate) {
+                navigator.vibrate(100);
+            }
+        }
+
+        // Cargar estadísticas de la materia
+        function loadSubjectStats(subjectKey) {
+            // Obtener progreso guardado
+            const progress = window.getSubjectProgress ? window.getSubjectProgress(subjectKey) : null;
+            
+            if (progress) {
+                document.getElementById('modalLevel').textContent = progress.level;
+                document.getElementById('modalScore').textContent = progress.score;
+                
+                // Calcular progreso hacia el siguiente nivel
+                const currentLevelScore = (progress.level - 1) * 100;
+                const progressInLevel = progress.score - currentLevelScore;
+                const progressPercent = Math.min(100, Math.max(0, (progressInLevel / 100) * 100));
+                
+                document.getElementById('modalProgress').textContent = `${Math.round(progressPercent)}%`;
+            } else {
+                // Valores por defecto
+                document.getElementById('modalLevel').textContent = '1';
+                document.getElementById('modalScore').textContent = '0';
+                document.getElementById('modalProgress').textContent = '0%';
+            }
+        }
+
+        // Cerrar modal
+        function closeModal() {
+            const modal = document.getElementById('subjectModal');
+            modal.classList.remove('show');
+            currentSubject = null;
+        }
+
+        // Jugar materia seleccionada
+        function playSubject() {
+            if (currentSubject && subjects[currentSubject]) {
+                const subject = subjects[currentSubject];
+                
+                // Guardar datos de la sesión
+                const sessionData = {
+                    subject: currentSubject,
+                    startTime: new Date().toISOString(),
+                    playerCoins: playerCoins
+                };
+                localStorage.setItem('currentGameSession', JSON.stringify(sessionData));
+                
+                // Redirigir a la página de la materia
+                window.location.href = subject.url;
+            }
+        }
+
+        // Controles de cámara
+        function resetCamera() {
+            camera.position.set(0, 15, 20);
+            controls.target.set(0, 0, 0);
+            controls.update();
+        }
+
+        function zoomIn() {
+            const direction = new THREE.Vector3();
+            camera.getWorldDirection(direction);
+            camera.position.add(direction.multiplyScalar(2));
+            controls.update();
+        }
+
+        function zoomOut() {
+            const direction = new THREE.Vector3();
+            camera.getWorldDirection(direction);
+            camera.position.add(direction.multiplyScalar(-2));
+            controls.update();
+        }
+
+        function toggleAutoRotate() {
+            isAutoRotating = !isAutoRotating;
+            const btn = event.target;
+            btn.style.background = isAutoRotating ? 
+                'linear-gradient(45deg, #00b894, #55efc4)' : 
+                'linear-gradient(45deg, #4ecdc4, #45b7d1)';
+        }
+
+        // Actualizar progreso de carga
+        function updateLoadingProgress(percent) {
+            loadingProgress = percent;
+            const progressBar = document.getElementById('loadingProgress');
+            if (progressBar) {
+                progressBar.style.width = `${percent}%`;
+            }
+        }
+
+        // Cargar monedas del jugador
+        function loadPlayerCoins() {
+            const coins = localStorage.getItem('totalCoins');
+            playerCoins = coins ? parseInt(coins) : 0;
+            document.getElementById('playerCoins').textContent = playerCoins;
+        }
+
+                // Volver al menú principal
+        function goBack() {
+            window.location.href = 'intro.html';
+        }
+
+        // Función para guardar progreso del mundo
+        function saveWorldProgress() {
+            const worldData = {
+                visitedSubjects: [],
+                totalPlayTime: 0,
+                lastVisit: new Date().toISOString(),
+                preferences: {
+                    autoRotate: isAutoRotating,
+                    cameraPosition: {
+                        x: camera.position.x,
+                        y: camera.position.y,
+                        z: camera.position.z
+                    }
+                }
+            };
+
+            // Guardar qué materias ha visitado el jugador
+            Object.keys(subjects).forEach(subjectKey => {
+                const progress = window.getSubjectProgress ? window.getSubjectProgress(subjectKey) : null;
+                if (progress && progress.score > 0) {
+                    worldData.visitedSubjects.push(subjectKey);
+                }
+            });
+
+            localStorage.setItem('worldProgress', JSON.stringify(worldData));
+        }
+
+        // Función para cargar progreso del mundo
+        function loadWorldProgress() {
+            const worldData = localStorage.getItem('worldProgress');
+            if (worldData) {
+                try {
+                    const data = JSON.parse(worldData);
+                    
+                    // Restaurar preferencias
+                    if (data.preferences) {
+                        isAutoRotating = data.preferences.autoRotate || false;
+                        
+                        if (data.preferences.cameraPosition) {
+                            camera.position.set(
+                                data.preferences.cameraPosition.x,
+                                data.preferences.cameraPosition.y,
+                                data.preferences.cameraPosition.z
+                            );
+                        }
+                    }
+
+                    // Marcar casas visitadas con efectos especiales
+                    if (data.visitedSubjects) {
+                        data.visitedSubjects.forEach(subjectKey => {
+                            const house = houses.find(h => h.subject === subjectKey);
+                            if (house) {
+                                addVisitedEffect(house.mesh);
+                            }
+                        });
+                    }
+
+                    console.log('🌍 Progreso del mundo cargado:', data);
+                } catch (error) {
+                    console.error('Error al cargar progreso del mundo:', error);
+                }
+            }
+        }
+
+        // Agregar efecto visual a casas visitadas
+        function addVisitedEffect(houseMesh) {
+            // Crear un anillo dorado alrededor de la casa
+            const ringGeometry = new THREE.RingGeometry(2, 2.5, 16);
+            const ringMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0xffd700,
+                transparent: true,
+                opacity: 0.6,
+                side: THREE.DoubleSide
+            });
+            const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+            ring.rotation.x = -Math.PI / 2;
+            ring.position.y = 0.1;
+            ring.userData = { rotationSpeed: 0.01 };
+            houseMesh.add(ring);
+
+            // Agregar partículas doradas
+            createGoldenParticles(houseMesh);
+        }
+
+        // Crear partículas doradas para casas visitadas
+        function createGoldenParticles(houseMesh) {
+            const particleCount = 20;
+            const particleGeometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+
+            for (let i = 0; i < particleCount; i++) {
+                positions[i * 3] = (Math.random() - 0.5) * 4;
+                positions[i * 3 + 1] = Math.random() * 6;
+                positions[i * 3 + 2] = (Math.random() - 0.5) * 4;
+            }
+
+            particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+            const particleMaterial = new THREE.PointsMaterial({
+                color: 0xffd700,
+                size: 0.1,
+                transparent: true,
+                opacity: 0.8
+            });
+
+            const particles = new THREE.Points(particleGeometry, particleMaterial);
+            particles.userData = { 
+                floatSpeed: 0.02,
+                rotationSpeed: 0.005
+            };
+            houseMesh.add(particles);
+        }
+
+        // Función para mostrar estadísticas del mundo
+        function showWorldStats() {
+            const visitedCount = houses.filter(house => {
+                const progress = window.getSubjectProgress ? window.getSubjectProgress(house.subject) : null;
+                return progress && progress.score > 0;
+            }).length;
+
+            const totalSubjects = Object.keys(subjects).length;
+            const explorationPercent = Math.round((visitedCount / totalSubjects) * 100);
+
+            const statsMessage = `🌍 ESTADÍSTICAS DEL MUNDO 🌍\n\n` +
+                               `🏠 Casas visitadas: ${visitedCount}/${totalSubjects}\n` +
+                               `📊 Exploración: ${explorationPercent}%\n` +
+                               `🪙 Monedas totales: ${playerCoins}\n` +
+                               `🎮 Materias disponibles: ${totalSubjects}`;
+
+            alert(statsMessage);
+        }
+
+        // Función para crear efectos climáticos
+        function createWeatherEffects() {
+            // Crear lluvia ocasional
+            if (Math.random() < 0.3) {
+                createRain();
+            }
+            
+            // Crear mariposas
+            createButterflies();
+        }
+
+        // Crear efecto de lluvia
+        function createRain() {
+            const rainGeometry = new THREE.BufferGeometry();
+            const rainCount = 1000;
+            const positions = new Float32Array(rainCount * 3);
+
+            for (let i = 0; i < rainCount; i++) {
+                positions[i * 3] = (Math.random() - 0.5) * 100;
+                positions[i * 3 + 1] = Math.random() * 50 + 20;
+                positions[i * 3 + 2] = (Math.random() - 0.5) * 100;
+            }
+
+            rainGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+            const rainMaterial = new THREE.PointsMaterial({
+                color: 0x87CEEB,
+                size: 0.1,
+                transparent: true,
+                opacity: 0.6
+            });
+
+            const rain = new THREE.Points(rainGeometry, rainMaterial);
+            rain.userData = { 
+                fallSpeed: 0.2,
+                lifetime: 10000 // 10 segundos
+            };
+            scene.add(rain);
+
+            // Animar lluvia
+            const startTime = Date.now();
+            const animateRain = () => {
+                const elapsed = Date.now() - startTime;
+                
+                if (elapsed < rain.userData.lifetime) {
+                    const positions = rain.geometry.attributes.position.array;
+                    for (let i = 1; i < positions.length; i += 3) {
+                        positions[i] -= rain.userData.fallSpeed;
+                        if (positions[i] < 0) {
+                            positions[i] = 50;
+                        }
+                    }
+                    rain.geometry.attributes.position.needsUpdate = true;
+                    requestAnimationFrame(animateRain);
+                } else {
+                    scene.remove(rain);
+                }
+            };
+            animateRain();
+        }
+
+        // Crear mariposas
+        function createButterflies() {
+            for (let i = 0; i < 5; i++) {
+                const butterfly = new THREE.Group();
+
+                // Cuerpo
+                const bodyGeometry = new THREE.CylinderGeometry(0.02, 0.02, 0.3, 4);
+                const bodyMaterial = new THREE.MeshLambertMaterial({ color: 0x8B4513 });
+                const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+                butterfly.add(body);
+
+                // Alas
+                const wingGeometry = new THREE.PlaneGeometry(0.2, 0.3);
+                const wingColors = [0xff69b4, 0xff1493, 0xffd700, 0xff4500];
+                const wingColor = wingColors[Math.floor(Math.random() * wingColors.length)];
+                const wingMaterial = new THREE.MeshLambertMaterial({ 
+                    color: wingColor,
+                    side: THREE.DoubleSide,
+                    transparent: true,
+                    opacity: 0.8
+                });
+
+                const leftWing = new THREE.Mesh(wingGeometry, wingMaterial);
+                leftWing.position.set(-0.15, 0, 0);
+                butterfly.add(leftWing);
+
+                const rightWing = new THREE.Mesh(wingGeometry, wingMaterial);
+                rightWing.position.set(0.15, 0, 0);
+                butterfly.add(rightWing);
+
+                // Posición inicial aleatoria
+                butterfly.position.set(
+                    (Math.random() - 0.5) * 40,
+                    2 + Math.random() * 8,
+                    (Math.random() - 0.5) * 40
+                );
+
+                butterfly.userData = {
+                    flightPath: Math.random() * Math.PI * 2,
+                    flightSpeed: 0.02 + Math.random() * 0.02,
+                    wingBeatSpeed: 0.3 + Math.random() * 0.2,
+                    wingBeatOffset: Math.random() * Math.PI * 2
+                };
+
+                scene.add(butterfly);
+
+                // Animar mariposa
+                const animateButterfly = () => {
+                    const time = Date.now() * 0.001;
+                    
+                    // Movimiento de vuelo
+                    butterfly.userData.flightPath += butterfly.userData.flightSpeed;
+                    butterfly.position.x += Math.cos(butterfly.userData.flightPath) * 0.1;
+                    butterfly.position.z += Math.sin(butterfly.userData.flightPath) * 0.1;
+                    butterfly.position.y += Math.sin(time * 2 + butterfly.userData.wingBeatOffset) * 0.05;
+
+                    // Aleteo de alas
+                    const wingBeat = Math.sin(time * butterfly.userData.wingBeatSpeed + butterfly.userData.wingBeatOffset);
+                    leftWing.rotation.z = wingBeat * 0.5;
+                    rightWing.rotation.z = -wingBeat * 0.5;
+
+                    // Mantener dentro de los límites
+                    if (Math.abs(butterfly.position.x) > 25 || Math.abs(butterfly.position.z) > 25) {
+                        butterfly.userData.flightPath += Math.PI;
+                    }
+
+                    requestAnimationFrame(animateButterfly);
+                };
+                animateButterfly();
+            }
+        }
+
+        // Función para crear efectos de día/noche
+        function createDayNightCycle() {
+            const time = (Date.now() * 0.0001) % (Math.PI * 2);
+            const dayIntensity = (Math.sin(time) + 1) / 2;
+            
+            // Cambiar color del cielo
+            const skyColor = new THREE.Color();
+            skyColor.lerpColors(
+                new THREE.Color(0x191970), // Azul noche
+                new THREE.Color(0x87CEEB), // Azul día
+                dayIntensity
+            );
+            scene.background = skyColor;
+
+            // Ajustar intensidad de luces
+            scene.traverse((object) => {
+                if (object.type === 'DirectionalLight') {
+                    object.intensity = 0.3 + dayIntensity * 0.5;
+                }
+                if (object.type === 'AmbientLight') {
+                    object.intensity = 0.2 + dayIntensity * 0.4;
+                }
+            });
+        }
+
+        // Función de depuración
+        function debugWorld() {
+            console.log('🐛 INFORMACIÓN DE DEPURACIÓN - MUNDO 3D:');
+            console.log('Casas creadas:', houses.length);
+            console.log('Objetos en escena:', scene.children.length);
+            console.log('Posición de cámara:', camera.position);
+            console.log('Materias disponibles:', Object.keys(subjects));
+            console.log('Auto rotación:', isAutoRotating);
+            console.log('Monedas del jugador:', playerCoins);
+        }
+
+        // Hacer funciones disponibles globalmente
+        window.debugWorld = debugWorld;
+        window.showWorldStats = showWorldStats;
+        window.saveWorldProgress = saveWorldProgress;
+        window.createWeatherEffects = createWeatherEffects;
+
+        // Inicialización principal
+        function initializeWorld() {
+            console.log('🌍 Inicializando mundo de aprendizaje...');
+            
+            updateLoadingProgress(10);
+            
+            // Cargar monedas del jugador
+            loadPlayerCoins();
+            updateLoadingProgress(20);
+            
+            // Inicializar mundo 3D
+            initWorld();
+            updateLoadingProgress(90);
+            
+            // Cargar progreso del mundo
+            loadWorldProgress();
+            
+            // Crear efectos climáticos
+            createWeatherEffects();
+            
+            // Finalizar carga
+            updateLoadingProgress(100);
+            
+            // Ocultar pantalla de carga
+            setTimeout(() => {
+                const loadingScreen = document.getElementById('loadingScreen');
+                loadingScreen.classList.add('hidden');
+                
+                // Guardar progreso al cargar
+                saveWorldProgress();
+                
+                console.log('✅ Mundo de aprendizaje completamente cargado');
+            }, 500);
+        }
+
+        // Controles de teclado
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case 'Escape':
+                    if (document.getElementById('subjectModal').classList.contains('show')) {
+                        closeModal();
+                    } else {
+                        goBack();
+                    }
+                    break;
+                case 'r':
+                case 'R':
+                    resetCamera();
+                    break;
+                case 'a':
+                case 'A':
+                    toggleAutoRotate();
+                    break;
+                case 's':
+                case 'S':
+                    showWorldStats();
+                    break;
+                case 'w':
+                case 'W':
+                    createWeatherEffects();
+                    break;
+                case ' ':
+                    e.preventDefault();
+                    if (currentSubject) {
+                        playSubject();
+                    }
+                    break;
+            }
+        });
+
+        // Guardar progreso al salir
+        window.addEventListener('beforeunload', () => {
+            saveWorldProgress();
+        });
+
+        // Actualizar monedas cuando cambien en otros módulos
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'totalCoins') {
+                loadPlayerCoins();
+            }
+        });
+
+        // Inicializar al cargar la página
+        window.addEventListener('load', function() {
+            console.log('🌍 Cargando mundo de aprendizaje...');
+            
+            initializeWorld();
+            
+            console.log('🎯 Características activas:');
+            console.log('  - Mundo 3D interactivo con 8 casas de materias ✅');
+            console.log('  - Controles de cámara orbital ✅');
+            console.log('  - Animaciones y efectos visuales ✅');
+                        console.log('  - Sistema de click en casas ✅');
+            console.log('  - Modal informativo por materia ✅');
+            console.log('  - Minimapa con ubicaciones ✅');
+            console.log('  - Efectos climáticos y decoraciones ✅');
+            console.log('  - Guardado de progreso y preferencias ✅');
+            console.log('  - Integración con sistema de monedas ✅');
+            console.log('  - Controles de teclado ✅');
+            console.log('  - Responsive design ✅');
+        });
+
+        // Función para crear efectos especiales en festividades
+        function createHolidayEffects() {
+            const now = new Date();
+            const month = now.getMonth();
+            const day = now.getDate();
+
+            // Navidad (Diciembre)
+            if (month === 11) {
+                createSnowEffect();
+                addChristmasDecorations();
+            }
+            // Halloween (Octubre)
+            else if (month === 9) {
+                createSpookyEffects();
+            }
+            // Primavera (Marzo-Mayo)
+            else if (month >= 2 && month <= 4) {
+                createSpringEffects();
+            }
+        }
+
+        // Efecto de nieve para Navidad
+        function createSnowEffect() {
+            const snowGeometry = new THREE.BufferGeometry();
+            const snowCount = 500;
+            const positions = new Float32Array(snowCount * 3);
+
+            for (let i = 0; i < snowCount; i++) {
+                positions[i * 3] = (Math.random() - 0.5) * 100;
+                positions[i * 3 + 1] = Math.random() * 50 + 20;
+                positions[i * 3 + 2] = (Math.random() - 0.5) * 100;
+            }
+
+            snowGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+            const snowMaterial = new THREE.PointsMaterial({
+                color: 0xffffff,
+                size: 0.2,
+                transparent: true,
+                opacity: 0.8
+            });
+
+            const snow = new THREE.Points(snowGeometry, snowMaterial);
+            scene.add(snow);
+
+            // Animar nieve
+            const animateSnow = () => {
+                const positions = snow.geometry.attributes.position.array;
+                for (let i = 1; i < positions.length; i += 3) {
+                    positions[i] -= 0.1;
+                    if (positions[i] < 0) {
+                        positions[i] = 50;
+                    }
+                }
+                snow.geometry.attributes.position.needsUpdate = true;
+                requestAnimationFrame(animateSnow);
+            };
+            animateSnow();
+        }
+
+        // Decoraciones navideñas
+        function addChristmasDecorations() {
+            houses.forEach(house => {
+                // Agregar luces navideñas
+                const lightsGeometry = new THREE.SphereGeometry(0.05, 8, 8);
+                const colors = [0xff0000, 0x00ff00, 0x0000ff, 0xffff00];
+                
+                for (let i = 0; i < 8; i++) {
+                    const lightMaterial = new THREE.MeshBasicMaterial({ 
+                        color: colors[i % colors.length],
+                        emissive: colors[i % colors.length],
+                        emissiveIntensity: 0.3
+                    });
+                    const light = new THREE.Mesh(lightsGeometry, lightMaterial);
+                    const angle = (i / 8) * Math.PI * 2;
+                    light.position.set(
+                        Math.cos(angle) * 2,
+                        2.5,
+                        Math.sin(angle) * 2
+                    );
+                    house.mesh.add(light);
+                }
+            });
+        }
+
+        // Efectos de primavera
+        function createSpringEffects() {
+            // Crear más flores
+            for (let i = 0; i < 20; i++) {
+                const flower = new THREE.Group();
+                
+                // Pétalos de sakura
+                const petalGeometry = new THREE.PlaneGeometry(0.1, 0.2);
+                const petalMaterial = new THREE.MeshLambertMaterial({ 
+                    color: 0xffb6c1,
+                    side: THREE.DoubleSide,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                
+                for (let j = 0; j < 5; j++) {
+                    const petal = new THREE.Mesh(petalGeometry, petalMaterial);
+                    const angle = (j / 5) * Math.PI * 2;
+                    petal.position.set(
+                        Math.cos(angle) * 0.1,
+                        0,
+                        Math.sin(angle) * 0.1
+                    );
+                    petal.rotation.z = angle;
+                    flower.add(petal);
+                }
+
+                flower.position.set(
+                    (Math.random() - 0.5) * 50,
+                    5 + Math.random() * 10,
+                    (Math.random() - 0.5) * 50
+                );
+
+                flower.userData = {
+                    fallSpeed: 0.02 + Math.random() * 0.02,
+                    rotationSpeed: 0.01 + Math.random() * 0.02
+                };
+
+                scene.add(flower);
+
+                // Animar caída de pétalos
+                const animatePetal = () => {
+                    flower.position.y -= flower.userData.fallSpeed;
+                    flower.rotation.y += flower.userData.rotationSpeed;
+                    
+                    if (flower.position.y < 0) {
+                        flower.position.y = 20;
+                        flower.position.x = (Math.random() - 0.5) * 50;
+                        flower.position.z = (Math.random() - 0.5) * 50;
+                    }
+                    
+                    requestAnimationFrame(animatePetal);
+                };
+                animatePetal();
+            }
+        }
+
+        // Efectos de Halloween
+        function createSpookyEffects() {
+            // Cambiar colores a tonos más oscuros
+            scene.background = new THREE.Color(0x2c1810);
+            
+            // Agregar murciélagos
+            for (let i = 0; i < 3; i++) {
+                const bat = new THREE.Group();
+                
+                // Cuerpo del murciélago
+                const bodyGeometry = new THREE.SphereGeometry(0.1, 8, 8);
+                const bodyMaterial = new THREE.MeshLambertMaterial({ color: 0x000000 });
+                const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+                bat.add(body);
+                
+                // Alas
+                const wingGeometry = new THREE.PlaneGeometry(0.3, 0.2);
+                const wingMaterial = new THREE.MeshLambertMaterial({ 
+                    color: 0x1a1a1a,
+                    side: THREE.DoubleSide
+                });
+                
+                const leftWing = new THREE.Mesh(wingGeometry, wingMaterial);
+                leftWing.position.set(-0.2, 0, 0);
+                bat.add(leftWing);
+                
+                const rightWing = new THREE.Mesh(wingGeometry, wingMaterial);
+                rightWing.position.set(0.2, 0, 0);
+                bat.add(rightWing);
+                
+                bat.position.set(
+                    (Math.random() - 0.5) * 40,
+                    8 + Math.random() * 5,
+                    (Math.random() - 0.5) * 40
+                );
+                
+                bat.userData = {
+                    flightPath: Math.random() * Math.PI * 2,
+                    flightSpeed: 0.03 + Math.random() * 0.02
+                };
+                
+                scene.add(bat);
+                
+                // Animar murciélago
+                const animateBat = () => {
+                    const time = Date.now() * 0.001;
+                    bat.userData.flightPath += bat.userData.flightSpeed;
+                    bat.position.x += Math.cos(bat.userData.flightPath) * 0.2;
+                    bat.position.z += Math.sin(bat.userData.flightPath) * 0.2;
+                    
+                    // Aleteo
+                    const wingBeat = Math.sin(time * 8) * 0.3;
+                    leftWing.rotation.z = wingBeat;
+                    rightWing.rotation.z = -wingBeat;
+                    
+                    requestAnimationFrame(animateBat);
+                };
+                animateBat();
+            }
+        }
+
+        // Función para crear tutorial interactivo
+        function createTutorial() {
+            const tutorialSteps = [
+                {
+                    title: "¡Bienvenido al Mundo de Aprendizaje!",
+                    description: "Este es tu mundo personal donde puedes acceder a todas las materias educativas.",
+                    position: { x: 0, y: 0, z: 0 }
+                },
+                {
+                    title: "Casas de Materias",
+                    description: "Cada casa colorida representa una materia diferente. ¡Haz clic en ellas para explorar!",
+                    position: { x: 8, y: 0, z: 8 }
+                },
+                {
+                    title: "Controles de Cámara",
+                    description: "Arrastra para rotar la vista, usa la rueda del ratón para hacer zoom.",
+                    position: { x: 0, y: 15, z: 20 }
+                },
+                {
+                    title: "Minimapa",
+                    description: "El minimapa te muestra la ubicación de todas las casas de materias.",
+                    position: { x: -15, y: 5, z: 15 }
+                }
+            ];
+
+            let currentStep = 0;
+            
+            function showTutorialStep(step) {
+                const tutorial = document.createElement('div');
+                tutorial.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 248, 255, 0.95));
+                    border-radius: 25px;
+                    padding: 2rem;
+                    max-width: 400px;
+                    text-align: center;
+                    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+                    border: 3px solid rgba(78, 205, 196, 0.4);
+                    z-index: 300;
+                `;
+                
+                tutorial.innerHTML = `
+                    <h3 style="font-size: 1.5rem; color: #2d3436; margin-bottom: 1rem;">${step.title}</h3>
+                    <p style="font-size: 1rem; color: #636e72; margin-bottom: 2rem; line-height: 1.5;">${step.description}</p>
+                    <div style="display: flex; gap: 15px; justify-content: center;">
+                        ${currentStep > 0 ? '<button onclick="previousTutorialStep()" style="padding: 10px 20px; background: #ddd; border: none; border-radius: 15px; cursor: pointer;">⬅️ Anterior</button>' : ''}
+                        ${currentStep < tutorialSteps.length - 1 ? '<button onclick="nextTutorialStep()" style="padding: 10px 20px; background: linear-gradient(45deg, #4ecdc4, #45b7d1); color: white; border: none; border-radius: 15px; cursor: pointer;">Siguiente ➡️</button>' : '<button onclick="closeTutorial()" style="padding: 10px 20px; background: linear-gradient(45deg, #00b894, #55efc4); color: white; border: none; border-radius: 15px; cursor: pointer;">¡Entendido! ✅</button>'}
+                    </div>
+                `;
+                
+                document.body.appendChild(tutorial);
+                window.currentTutorial = tutorial;
+                
+                // Mover cámara al punto de interés
+                const targetPosition = step.position;
+                const startPosition = camera.position.clone();
+                const startTime = Date.now();
+                const duration = 1000;
+                
+                const animateCamera = () => {
+                    const elapsed = Date.now() - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const easeProgress = 1 - Math.pow(1 - progress, 3);
+                    
+                    camera.position.lerpVectors(startPosition, new THREE.Vector3(targetPosition.x, targetPosition.y, targetPosition.z), easeProgress);
+                    controls.update();
+                    
+                    if (progress < 1) {
+                        requestAnimationFrame(animateCamera);
+                    }
+                };
+                animateCamera();
+            }
+            
+            window.nextTutorialStep = () => {
+                if (window.currentTutorial) {
+                    document.body.removeChild(window.currentTutorial);
+                }
+                currentStep++;
+                if (currentStep < tutorialSteps.length) {
+                    showTutorialStep(tutorialSteps[currentStep]);
+                }
+            };
+            
+            window.previousTutorialStep = () => {
+                if (window.currentTutorial) {
+                    document.body.removeChild(window.currentTutorial);
+                }
+                currentStep--;
+                if (currentStep >= 0) {
+                    showTutorialStep(tutorialSteps[currentStep]);
+                }
+            };
+            
+            window.closeTutorial = () => {
+                if (window.currentTutorial) {
+                    document.body.removeChild(window.currentTutorial);
+                }
+                localStorage.setItem('tutorialCompleted', 'true');
+                resetCamera();
+            };
+            
+            // Mostrar tutorial solo si no se ha completado antes
+            if (!localStorage.getItem('tutorialCompleted')) {
+                setTimeout(() => {
+                    showTutorialStep(tutorialSteps[0]);
+                }, 2000);
+            }
+        }
+
+        // Agregar efectos de festividades al inicializar
+        setTimeout(() => {
+            createHolidayEffects();
+            createTutorial();
+        }, 1000);
+
+        console.log('🎮 Mundo de aprendizaje 3D completamente inicializado');
+        console.log('🎯 Funciones disponibles:');
+        console.log('  - debugWorld() - Ver información de depuración');
+        console.log('  - showWorldStats() - Ver estadísticas del mundo');
+        console.log('  - saveWorldProgress() - Guardar progreso manualmente');
+        console.log('  - createWeatherEffects() - Crear efectos climáticos');
+        console.log('📋 Controles de teclado:');
+        console.log('  - R: Resetear cámara');
+        console.log('  - A: Toggle auto-rotación');
+        console.log('  - S: Mostrar estadísticas');
+        console.log('  - W: Crear efectos climáticos');
+        console.log('  - Espacio: Jugar materia seleccionada');
+        console.log('  - Escape: Cerrar modal/salir');
+    </script>
+</body>
+</html>

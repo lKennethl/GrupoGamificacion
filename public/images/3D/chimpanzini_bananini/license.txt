@@ -1,0 +1,11 @@
+Model Information:
+* title:	Chimpanzini Bananini
+* source:	https://sketchfab.com/3d-models/chimpanzini-bananini-215481cabaa9435ba6c2ef06979e8dd9
+* author:	shtran (https://sketchfab.com/shtran)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Chimpanzini Bananini" (https://sketchfab.com/3d-models/chimpanzini-bananini-215481cabaa9435ba6c2ef06979e8dd9) by shtran (https://sketchfab.com/shtran) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

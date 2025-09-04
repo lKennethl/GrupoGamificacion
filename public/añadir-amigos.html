@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Añadir Amigos - Mundo de Aprendizaje</title>
+  <script
+    type="module"
+    src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"
+  ></script>
+  <style>
+    :root {
+      --primary-color: #ff6b6b;
+      --secondary-color: #4ecdc4;
+      --accent-color: #45b7d1;
+      --background-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --text-light: #ffffff;
+      --text-dark: #2d3436;
+      --shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+      --button-hover: #e84343;
+      --input-bg: rgba(255, 255, 255, 0.15);
+      --input-border: rgba(255, 255, 255, 0.4);
+      --success-color: #2ecc71;
+      --error-color: #e74c3c;
+      --font-family: 'Comic Sans MS', cursive, sans-serif;
+      --card-bg: rgba(255, 255, 255, 0.12);
+      --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+      --scrollbar-bg: rgba(255, 255, 255, 0.1);
+      --scrollbar-thumb: var(--secondary-color);
+      --transition-speed: 0.3s;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--font-family);
+      background: var(--background-gradient);
+      color: var(--text-light);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem 3rem;
+      user-select: none;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+    }
+
+    header {
+      width: 100%;
+      max-width: 900px;
+      text-align: center;
+      margin-bottom: 2rem;
+      user-select: text;
+      text-shadow: 2px 2px 6px rgba(0,0,0,0.7);
+      position: sticky;
+      top: 0;
+      background: rgba(0,0,0,0.6);
+      padding: 1rem 0;
+      border-radius: 15px;
+      z-index: 1000;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    }
+
+    header h1 {
+      font-size: 2.8rem;
+      background: linear-gradient(45deg, #fff, var(--secondary-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.3rem;
+      user-select: text;
+    }
+
+    header p {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #dcdde1cc;
+      user-select: text;
+    }
+
+    main {
+      width: 100%;
+      max-width: 900px;
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 2rem 2.5rem;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      user-select: text;
+      min-height: 60vh;
+      position: relative;
+    }
+
+    /* Form container with subtle animation */
+    .form-container {
+      max-width: 500px;
+      margin: 0 auto;
+      background: rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 2rem 2.5rem;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+      transition: box-shadow var(--transition-speed) ease;
+    }
+    .form-container:focus-within {
+      box-shadow: 0 12px 40px var(--secondary-color);
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    label {
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 0.3rem;
+      user-select: text;
+    }
+
+    input[type="text"] {
+      padding: 0.9rem 1.2rem;
+      font-size: 1.2rem;
+      border-radius: 15px;
+      border: 2px solid var(--input-border);
+      background: var(--input-bg);
+      color: var(--text-light);
+      transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+      font-family: var(--font-family);
+      user-select: text;
+      box-shadow: inset 0 0 8px rgba(0,0,0,0.2);
+      caret-color: var(--secondary-color);
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: var(--secondary-color);
+      background: rgba(255,255,255,0.25);
+      box-shadow: 0 0 12px var(--secondary-color);
+    }
+
+    /* Real-time validation feedback */
+    input.valid {
+      border-color: var(--success-color);
+      box-shadow: 0 0 12px var(--success-color);
+    }
+    input.invalid {
+      border-color: var(--error-color);
+      box-shadow: 0 0 12px var(--error-color);
+    }
+
+    button {
+      background: var(--primary-color);
+      border: none;
+      border-radius: 30px;
+      padding: 15px 0;
+      font-weight: 900;
+      font-size: 1.3rem;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      transition: background var(--transition-speed) ease, transform 0.2s ease;
+      user-select: none;
+      width: 100%;
+      max-width: 300px;
+      align-self: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    button:disabled {
+      background: rgba(255, 107, 107, 0.5);
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    button:hover:not(:disabled),
+    button:focus:not(:disabled) {
+      background: var(--button-hover);
+      outline: none;
+      box-shadow: 0 15px 40px rgba(232, 67, 67, 0.7);
+      transform: scale(1.05);
+    }
+
+    /* Loading spinner inside button */
+    .spinner {
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top: 3px solid white;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg);}
+      100% { transform: rotate(360deg);}
+    }
+
+    /* Friends list */
+    .friends-list {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 1rem 1.5rem;
+      max-height: 420px;
+      overflow-y: auto;
+      box-shadow: var(--card-shadow);
+      user-select: text;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .friends-list h2 {
+      margin-bottom: 1rem;
+      font-size: 1.8rem;
+      color: var(--secondary-color);
+      text-shadow: 1px 1px 4px rgba(0,0,0,0.6);
+      user-select: text;
+      text-align: center;
+    }
+
+    .friend-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.8rem 1rem;
+      border-radius: 15px;
+      background: rgba(255,255,255,0.1);
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.15);
+      transition: background var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+      cursor: default;
+      user-select: text;
+      position: relative;
+    }
+
+    .friend-item:hover,
+    .friend-item:focus-within {
+      background: rgba(255,255,255,0.2);
+      box-shadow: 0 0 15px var(--secondary-color);
+      outline: none;
+    }
+
+    .friend-avatar {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      overflow: hidden;
+      box-shadow: 0 0 15px var(--secondary-color);
+      flex-shrink: 0;
+      background: radial-gradient(circle, var(--secondary-color), var(--accent-color));
+      user-select: none;
+      position: relative;
+    }
+
+    .friend-avatar model-viewer {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .friend-info {
+      flex-grow: 1;
+      color: var(--text-light);
+      font-weight: 700;
+      font-size: 1.2rem;
+      text-shadow: 0 0 5px rgba(0,0,0,0.7);
+      user-select: text;
+      word-break: break-word;
+    }
+
+    .friend-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .friend-actions button {
+      background: var(--secondary-color);
+      border: none;
+      border-radius: 25px;
+      padding: 8px 18px;
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--text-dark);
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      transition: background var(--transition-speed) ease, transform 0.2s ease;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .friend-actions button:hover,
+    .friend-actions button:focus {
+      background: var(--accent-color);
+      outline: none;
+      transform: scale(1.05);
+    }
+
+    /* Confirmation modal overlay */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Modal content */
+    .modal {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 2rem 2.5rem;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: var(--card-shadow);
+      text-align: center;
+      user-select: text;
+      color: var(--text-light);
+      position: relative;
+    }
+
+    .modal h3 {
+      margin-bottom: 1rem;
+      font-size: 1.8rem;
+      color: var(--primary-color);
+      text-shadow: 1px 1px 4px rgba(0,0,0,0.6);
+    }
+
+    .modal p {
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+      line-height: 1.4;
+    }
+
+    .modal-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+    }
+
+    .modal-buttons button {
+      flex: 1;
+      padding: 12px 0;
+      font-weight: 900;
+      font-size: 1.1rem;
+      border-radius: 30px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s ease;
+      user-select: none;
+    }
+
+    .modal-buttons button.confirm {
+      background: var(--error-color);
+      color: white;
+      box-shadow: 0 10px 30px rgba(231, 76, 60, 0.6);
+    }
+    .modal-buttons button.confirm:hover,
+    .modal-buttons button.confirm:focus {
+      background: #c0392b;
+      outline: none;
+      transform: scale(1.05);
+    }
+
+    .modal-buttons button.cancel {
+      background: var(--secondary-color);
+      color: var(--text-dark);
+      box-shadow: 0 10px 30px rgba(78, 205, 196, 0.6);
+    }
+    .modal-buttons button.cancel:hover,
+    .modal-buttons button.cancel:focus {
+      background: #3bb9b0;
+      outline: none;
+      transform: scale(1.05);
+    }
+
+    /* Messages */
+    .message {
+      font-weight: 700;
+      font-size: 1.1rem;
+      text-align: center;
+      min-height: 1.5rem;
+      user-select: text;
+      transition: opacity 0.4s ease;
+    }
+
+    .message.success {
+      color: var(--success-color);
+      text-shadow: 0 0 8px var(--success-color);
+    }
+
+    .message.error {
+      color: var(--error-color);
+      text-shadow: 0 0 8px var(--error-color);
+    }
+
+    /* Scrollbar styling */
+    .friends-list::-webkit-scrollbar {
+      width: 10px;
+    }
+    .friends-list::-webkit-scrollbar-track {
+      background: var(--scrollbar-bg);
+      border-radius: 10px;
+    }
+    .friends-list::-webkit-scrollbar-thumb {
+      background: var(--scrollbar-thumb);
+      border-radius: 10px;
+      box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
+    }
+
+    /* Back button styles */
+    #backBtn {
+      margin: 2rem auto 0;
+      background: var(--secondary-color);
+      border: none;
+      border-radius: 50px;
+      width: 60px;
+      height: 60px;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: background 0.3s ease, transform 0.3s ease;
+      user-select: none;
+      display: block;
+    }
+    #backBtn:hover,
+    #backBtn:focus {
+      background: var(--accent-color);
+      outline: none;
+      transform: scale(1.15) rotate(-10deg);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+    }
+    #backBtn svg {
+      fill: var(--text-dark);
+      width: 28px;
+      height: 28px;
+      transition: fill 0.3s ease;
+    }
+    #backBtn:hover svg,
+    #backBtn:focus svg {
+      fill: #222;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      main {
+        padding: 1.5rem 1rem;
+      }
+
+      .friend-avatar {
+        width: 55px;
+        height: 55px;
+      }
+
+      .friend-info {
+        font-size: 1rem;
+      }
+
+      button {
+        font-size: 1.1rem;
+        padding: 12px 0;
+        max-width: 100%;
+      }
+
+      .form-container {
+        padding: 1.5rem 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Añadir Amigos</h1>
+    <p>Conecta con tus compañeros para compartir aventuras y aprender juntos.</p>
+  </header>
+
+  <main>
+    <section class="form-container" aria-label="Formulario para añadir amigos">
+      <form id="addFriendForm" novalidate>
+        <label for="friendUsername">Nombre de usuario del amigo</label>
+        <input
+          type="text"
+          id="friendUsername"
+          name="friendUsername"
+          placeholder="Ejemplo: amiguito123"
+          autocomplete="off"
+          aria-required="true"
+          aria-describedby="inputHelp"
+          minlength="3"
+          maxlength="20"
+          pattern="^[a-zA-Z0-9_]+$"
+          title="Solo letras, números y guiones bajos"
+          aria-invalid="false"
+          aria-live="polite"
+        />
+        <div id="inputHelp" style="font-size: 0.9rem; color: #ccc; margin-top: -1rem; margin-bottom: 0.5rem;">
+          Solo letras, números y guiones bajos. Mínimo 3 caracteres.
+        </div>
+        <button type="submit" disabled aria-disabled="true" aria-label="Añadir amigo">
+          <span id="btnText">➕ Añadir Amigo</span>
+          <span id="btnSpinner" class="spinner" style="display:none;" aria-hidden="true"></span>
+        </button>
+        <div class="message" id="formMessage" role="alert" aria-live="assertive" aria-atomic="true"></div>
+      </form>
+    </section>
+
+    <section class="friends-list" aria-label="Lista de amigos">
+      <h2>Mis Amigos</h2>
+      <div id="friendsContainer" role="list" aria-live="polite" aria-relevant="additions removals">
+        <!-- Amigos cargados dinámicamente -->
+      </div>
+    </section>
+
+    <!-- Botón regresar abajo -->
+        <button id="backBtn" aria-label="Regresar al menú principal" title="Regresar al menú">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+      </svg>
+    </button>
+  </main>
+
+  <!-- Modal para confirmación de eliminación -->
+  <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalDesc" tabindex="-1" hidden>
+    <div class="modal" role="document">
+      <h3 id="modalTitle">Confirmar eliminación</h3>
+      <p id="modalDesc">¿Estás seguro de que quieres eliminar a <strong id="friendToDelete"></strong> de tus amigos?</p>
+      <div class="modal-buttons">
+        <button class="confirm" id="confirmDeleteBtn">Eliminar</button>
+        <button class="cancel" id="cancelDeleteBtn">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const friendsKey = 'myFriends';
+
+    const form = document.getElementById('addFriendForm');
+    const input = document.getElementById('friendUsername');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const btnText = document.getElementById('btnText');
+    const btnSpinner = document.getElementById('btnSpinner');
+    const messageEl = document.getElementById('formMessage');
+    const friendsContainer = document.getElementById('friendsContainer');
+
+    const modalOverlay = document.getElementById('modalOverlay');
+    const friendToDeleteSpan = document.getElementById('friendToDelete');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+
+    const backBtn = document.getElementById('backBtn');
+
+    let friendPendingDeletion = null;
+
+    // Load friends from localStorage
+    function loadFriends() {
+      const friends = JSON.parse(localStorage.getItem(friendsKey)) || [];
+      friendsContainer.innerHTML = '';
+      if (friends.length === 0) {
+        friendsContainer.innerHTML = '<p style="color:#ccc; text-align:center; user-select:none;">No tienes amigos añadidos aún.</p>';
+        return;
+      }
+      friends.forEach(friend => {
+        const friendEl = createFriendElement(friend);
+        friendsContainer.appendChild(friendEl);
+      });
+    }
+
+    // Create friend DOM element with accessible tooltip for confirmation
+    function createFriendElement(friend) {
+      const div = document.createElement('div');
+      div.className = 'friend-item';
+      div.setAttribute('role', 'listitem');
+      div.setAttribute('tabindex', '0');
+      div.setAttribute('aria-label', `Amigo ${friend.username}`);
+
+      const avatarDiv = document.createElement('div');
+      avatarDiv.className = 'friend-avatar';
+
+      const modelViewer = document.createElement('model-viewer');
+      modelViewer.setAttribute('src', friend.model || 'images/3D/skebob_v2/scene.gltf');
+      modelViewer.setAttribute('alt', `Avatar de ${friend.username}`);
+      modelViewer.setAttribute('camera-controls', '');
+      modelViewer.setAttribute('auto-rotate', '');
+      modelViewer.setAttribute('rotation-per-second', '20deg');
+      modelViewer.setAttribute('shadow-intensity', '1');
+      modelViewer.setAttribute('environment-image', 'neutral');
+      modelViewer.setAttribute('exposure', '1');
+      modelViewer.setAttribute('loading', 'eager');
+      modelViewer.setAttribute('autoplay', '');
+      avatarDiv.appendChild(modelViewer);
+
+      const infoDiv = document.createElement('div');
+      infoDiv.className = 'friend-info';
+      infoDiv.textContent = friend.username;
+
+      const actionsDiv = document.createElement('div');
+      actionsDiv.className = 'friend-actions';
+
+      const removeBtn = document.createElement('button');
+      removeBtn.textContent = 'Eliminar';
+      removeBtn.setAttribute('aria-label', `Eliminar amigo ${friend.username}`);
+      removeBtn.addEventListener('click', () => {
+        openDeleteModal(friend.username);
+      });
+
+      actionsDiv.appendChild(removeBtn);
+
+      div.appendChild(avatarDiv);
+      div.appendChild(infoDiv);
+      div.appendChild(actionsDiv);
+
+      return div;
+    }
+
+    // Open modal to confirm deletion
+    function openDeleteModal(username) {
+      friendPendingDeletion = username;
+      friendToDeleteSpan.textContent = username;
+      modalOverlay.hidden = false;
+      modalOverlay.classList.add('active');
+      modalOverlay.focus();
+    }
+
+    // Close modal
+    function closeDeleteModal() {
+      friendPendingDeletion = null;
+      modalOverlay.classList.remove('active');
+      setTimeout(() => {
+        modalOverlay.hidden = true;
+      }, 300);
+    }
+
+    // Delete friend after confirmation
+    function confirmDelete() {
+      if (!friendPendingDeletion) return;
+      let friends = JSON.parse(localStorage.getItem(friendsKey)) || [];
+      friends = friends.filter(f => f.username.toLowerCase() !== friendPendingDeletion.toLowerCase());
+      localStorage.setItem(friendsKey, JSON.stringify(friends));
+      showMessage(`Amigo "${friendPendingDeletion}" eliminado.`, 'success');
+      loadFriends();
+      closeDeleteModal();
+    }
+
+    // Show ephemeral message
+    function showMessage(text, type) {
+      messageEl.textContent = text;
+      messageEl.className = 'message ' + (type === 'success' ? 'success' : 'error');
+      messageEl.style.opacity = '1';
+      setTimeout(() => {
+        messageEl.style.opacity = '0';
+      }, 4000);
+    }
+
+    // Validate input and enable/disable button
+    input.addEventListener('input', () => {
+      const val = input.value.trim();
+      const valid = /^[a-zA-Z0-9_]{3,20}$/.test(val);
+      submitBtn.disabled = !valid;
+      submitBtn.setAttribute('aria-disabled', !valid);
+      input.setAttribute('aria-invalid', !valid);
+      if (!valid && val.length > 0) {
+        showMessage('Nombre inválido. Solo letras, números y guiones bajos, 3-20 caracteres.', 'error');
+        input.classList.add('invalid');
+        input.classList.remove('valid');
+      } else if (valid) {
+        messageEl.textContent = '';
+        messageEl.className = 'message';
+        input.classList.add('valid');
+        input.classList.remove('invalid');
+      } else {
+        messageEl.textContent = '';
+        messageEl.className = 'message';
+        input.classList.remove('valid', 'invalid');
+      }
+    });
+
+    // Add friend function
+    function addFriend(username) {
+      const friends = JSON.parse(localStorage.getItem(friendsKey)) || [];
+      if (friends.some(f => f.username.toLowerCase() === username.toLowerCase())) {
+        showMessage('Ya tienes a este amigo en tu lista.', 'error');
+        return false;
+      }
+      // Simulate random 3D model assignment
+      const models = [
+        'images/3D/brr_brr_patapim/scene.gltf',
+        'images/3D/luna_estelar/scene.gltf',
+        'images/3D/rayo_veloz/scene.gltf',
+        'images/3D/skebob_v2/scene.gltf'
+      ];
+      const model = models[Math.floor(Math.random() * models.length)];
+      friends.push({ username, model });
+      localStorage.setItem(friendsKey, JSON.stringify(friends));
+      showMessage(`Amigo "${username}" añadido con éxito.`, 'success');
+      loadFriends();
+      return true;
+    }
+
+    // Handle form submit
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const username = input.value.trim();
+      if (!username) return;
+      if (addFriend(username)) {
+        input.value = '';
+        submitBtn.disabled = true;
+        submitBtn.setAttribute('aria-disabled', 'true');
+        input.classList.remove('valid');
+      }
+    });
+
+    // Modal button events
+    confirmDeleteBtn.addEventListener('click', confirmDelete);
+    cancelDeleteBtn.addEventListener('click', closeDeleteModal);
+
+    // Close modal on Escape key
+    modalOverlay.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeDeleteModal();
+      }
+    });
+
+    // Trap focus inside modal for accessibility
+    modalOverlay.addEventListener('keydown', e => {
+      if (e.key === 'Tab') {
+        const focusableElements = modalOverlay.querySelectorAll('button');
+        const first = focusableElements[0];
+        const last = focusableElements[focusableElements.length - 1];
+        if (e.shiftKey) {
+          if (document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      }
+    });
+
+    // Back button click: redirige a intro.html
+    backBtn.addEventListener('click', () => {
+      window.location.href = 'intro.html';
+    });
+
+    // Hover/focus animations for back button
+    backBtn.addEventListener('mouseenter', () => {
+      backBtn.style.background = 'var(--accent-color)';
+      backBtn.style.transform = 'scale(1.15) rotate(-10deg)';
+      backBtn.querySelector('svg').style.fill = '#222';
+    });
+    backBtn.addEventListener('mouseleave', () => {
+      backBtn.style.background = 'var(--secondary-color)';
+      backBtn.style.transform = 'none';
+      backBtn.querySelector('svg').style.fill = 'var(--text-dark)';
+    });
+    backBtn.addEventListener('focus', () => {
+      backBtn.style.background = 'var(--accent-color)';
+      backBtn.style.transform = 'scale(1.15) rotate(-10deg)';
+      backBtn.querySelector('svg').style.fill = '#222';
+    });
+    backBtn.addEventListener('blur', () => {
+      backBtn.style.background = 'var(--secondary-color)';
+      backBtn.style.transform = 'none';
+      backBtn.querySelector('svg').style.fill = 'var(--text-dark)';
+    });
+
+    // Initialize
+    window.addEventListener('load', () => {
+      loadFriends();
+    });
+  </script>
+</body>
+</html>

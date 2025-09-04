@@ -1,0 +1,534 @@
+/* General Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+}
+
+body {
+    background: radial-gradient(circle at center, #2c5aa0 0%, #1e3a8a 60%, #0f172a 100%);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden; 
+    color: white;
+}
+
+.selection-container {
+    text-align: center;
+    width: 100%;
+    height: 100vh; /* Ocupa toda la altura del viewport */
+    position: relative;
+    display: flex;
+    flex-direction: column; /* Ahora los elementos se apilan verticalmente */
+    align-items: center;
+    justify-content: space-between; /* Espacio entre elementos */
+    padding: 0; /* Eliminamos padding para que el modelo ocupe todo */
+}
+
+/* Global Titles (Positioned absolutely at the top) */
+.title {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 4rem;
+    font-weight: bold;
+    text-shadow: 3px 3px 6px rgba(0,0,0,0.7);
+    letter-spacing: 2px;
+    color: #ffffff;
+    z-index: 20; 
+    pointer-events: none; /* No bloquea clics al modelo */
+}
+
+.subtitle {
+    position: absolute;
+    top: 90px; 
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.6rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    color: #85c1e9;
+    z-index: 20; 
+    pointer-events: none; /* No bloquea clics al modelo */
+}
+
+/* Character Display Area (for the 3D Model - now full screen) */
+.character-display {
+    position: absolute; /* Ocupa toda la pantalla */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: visible; 
+    z-index: 1; /* Detrás de los controles y texto */
+}
+
+.character-image-container {
+    width: 100%; 
+    height: 100%; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible; 
+}
+
+/* Model Viewer Specific Styles */
+model-viewer {
+    width: 100%;
+    height: 100%;
+    --poster-color: transparent; 
+    --progress-bar-color: #4ecdc4; 
+    --progress-bar-height: 4px;
+    transition: all 0.4s ease;
+    overflow: visible; 
+}
+
+model-viewer:hover {
+    transform: scale(1.05); 
+}
+
+/* Navigation Arrows */
+.navigation-arrows {
+    position: absolute;
+    top: 50%; 
+    transform: translateY(-50%);
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    pointer-events: none; /* Permite clics a través de ellos si no están sobre un botón */
+    padding: 0 20px;
+    z-index: 10; /* Por encima del modelo */
+}
+
+.nav-button {
+    background: rgba(255,255,255,0.15);
+    border: 3px solid rgba(255,255,255,0.4);
+    border-radius: 50%;
+    width: 85px;
+    height: 85px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    pointer-events: all; /* Permite clics en los botones */
+    backdrop-filter: blur(15px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.nav-button:hover {
+    background: rgba(255,255,255,0.25);
+    transform: scale(1.15);
+    border-color: rgba(255,255,255,0.7);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+}
+
+.nav-button:active {
+    transform: scale(1.05);
+}
+
+.nav-arrow {
+    font-size: 2.2rem;
+    color: white;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+}
+
+/* Character Name (now at the bottom, clickable) */
+.character-name {
+    position: absolute;
+    bottom: 120px; /* Encima de los controles inferiores */
+    font-size: 3rem;
+    font-weight: bold;
+    text-shadow: 3px 3px 6px rgba(0,0,0,0.8);
+    color: #f8c471;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer; /* Indica que es clickeable */
+    transition: color 0.3s ease;
+    z-index: 15; /* Por encima del modelo, debajo de los controles */
+}
+
+.character-name:hover {
+    color: #ffd700; /* Color dorado al pasar el ratón */
+}
+
+/* Bottom Controls (Fixed at the bottom) */
+.bottom-controls {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 25px;
+    align-items: center;
+    z-index: 20; /* Por encima de todo */
+}
+
+.control-hint {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(0,0,0,0.75);
+    padding: 10px 18px;
+    border-radius: 22px;
+    backdrop-filter: blur(15px);
+    border: 2px solid rgba(255,255,255,0.25);
+}
+
+.control-icon {
+    width: 30px;
+    height: 30px;
+    background: linear-gradient(45deg, #ff6b9d, #c44569);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 0.8rem;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+}
+
+.control-icon.select {
+    background: linear-gradient(45deg, #4ecdc4, #44a08d);
+}
+
+.control-text {
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.select-button {
+    background: linear-gradient(45deg, #4ecdc4, #44a08d);
+    border: none;
+    padding: 14px 30px;
+    border-radius: 22px;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 18px rgba(68, 160, 141, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.select-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(68, 160, 141, 0.6);
+    background: linear-gradient(45deg, #5fd3ca, #4db6a8);
+}
+
+.select-button:active {
+    transform: translateY(0);
+}
+
+/* Character Counter (Fixed at the top right) */
+.character-counter {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+    background: rgba(0,0,0,0.75);
+    color: white;
+    padding: 10px 18px;
+    border-radius: 18px;
+    backdrop-filter: blur(15px);
+    border: 2px solid rgba(255,255,255,0.25);
+    font-weight: bold;
+    font-size: 1rem;
+    z-index: 20; 
+}
+
+/* Floating Decorations */
+.floating-decoration {
+    position: absolute;
+    font-size: 1.8rem;
+    animation: float 4s ease-in-out infinite;
+    pointer-events: none;
+    opacity: 0.6;
+    z-index: 0; 
+}
+
+.decoration-1 { top: 12%; left: 8%; animation-delay: 0s; }
+.decoration-2 { top: 20%; right: 12%; animation-delay: 1.2s; }
+.decoration-3 { bottom: 18%; left: 6%; animation-delay: 2.4s; }
+.decoration-4 { bottom: 25%; right: 10%; animation-delay: 0.8s; }
+.decoration-5 { top: 30%; left: 88%; animation-delay: 1.8s; }
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.6; }
+    50% { transform: translateY(-18px) rotate(8deg); opacity: 1; }
+}
+
+/* Special Effects for Each Character */
+.character-effect {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    z-index: 1; 
+}
+
+.character-effect.active {
+    opacity: 1;
+}
+
+/* Specific Character Effects */
+.ballerina-effect {
+    background: radial-gradient(circle at center, rgba(255, 105, 180, 0.1) 0%, transparent 70%);
+}
+
+.ninja-effect {
+    background: radial-gradient(circle at center, rgba(139, 69, 19, 0.1) 0%, transparent 70%);
+}
+
+.shark-effect {
+    background: radial-gradient(circle at center, rgba(30, 144, 255, 0.1) 0%, transparent 70%);
+}
+
+.tralalero-effect {
+    background: radial-gradient(circle at center, rgba(255, 99, 71, 0.1) 0%, transparent 70%);
+}
+
+.sahur-effect {
+    background: radial-gradient(circle at center, rgba(147, 112, 219, 0.1) 0%, transparent 70%);
+}
+
+.cow-effect { 
+    background: radial-gradient(circle at center, rgba(173, 216, 230, 0.15) 0%, transparent 70%); 
+}
+
+/* Description Modal Styles */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 100; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.8); /* Black w/ opacity */
+    justify-content: center; /* Center content */
+    align-items: center; /* Center content */
+    backdrop-filter: blur(8px); /* Blur background */
+}
+
+.modal-content {
+    background-color: rgba(25, 25, 112, 0.9); /* Dark blue, slightly transparent */
+    margin: auto;
+    padding: 40px;
+    border: 2px solid #85c1e9;
+    border-radius: 20px;
+    width: 80%;
+    max-width: 600px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+    position: relative;
+    animation: fadeInScale 0.3s ease-out;
+    text-align: center;
+}
+
+@keyframes fadeInScale {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.close-button {
+    color: #aaa;
+    font-size: 40px;
+    font-weight: bold;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: #fff;
+}
+
+.modal-character-name {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #f8c471;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+    text-transform: uppercase;
+}
+
+.modal-character-description {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    margin-bottom: 15px;
+    color: #e8f5e8;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+.modal-character-power {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #a8e6cf;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+
+/* Responsive design */
+@media (max-width: 1024px) {
+    .title {
+        font-size: 3.5rem;
+        top: 15px;
+    }
+
+    .subtitle {
+        font-size: 1.4rem;
+        top: 75px;
+    }
+
+    .character-name {
+        font-size: 2.5rem;
+        bottom: 100px;
+    }
+
+    .nav-button {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .nav-arrow {
+        font-size: 1.8rem;
+    }
+
+    .bottom-controls {
+        gap: 15px;
+        bottom: 15px;
+        width: 90%;
+        justify-content: center;
+    }
+
+    .control-hint {
+        padding: 8px 15px;
+        font-size: 0.9rem;
+    }
+
+    .select-button {
+        padding: 12px 25px;
+        font-size: 1rem;
+    }
+
+    .modal-content {
+        width: 90%;
+        padding: 30px;
+    }
+    .modal-character-name {
+        font-size: 2rem;
+    }
+    .modal-character-description {
+        font-size: 1.1rem;
+    }
+    .modal-character-power {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .title {
+        font-size: 3rem;
+    }
+    
+    .subtitle {
+        font-size: 1.2rem;
+    }
+
+    .character-name {
+        font-size: 2rem;
+        bottom: 90px;
+    }
+    
+    .nav-button {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .nav-arrow {
+        font-size: 1.5rem;
+    }
+
+    .modal-content {
+        padding: 25px;
+    }
+    .modal-character-name {
+        font-size: 1.8rem;
+    }
+    .modal-character-description {
+        font-size: 1rem;
+    }
+    .modal-character-power {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .title {
+        font-size: 2.5rem;
+        top: 10px;
+    }
+    .subtitle {
+        font-size: 1rem;
+        top: 60px;
+    }
+    .character-name {
+        font-size: 1.8rem;
+        bottom: 80px;
+    }
+    .nav-button {
+        width: 50px;
+        height: 50px;
+    }
+    .nav-arrow {
+        font-size: 1.2rem;
+    }
+    .character-counter {
+        top: 15px;
+        right: 15px;
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+    .bottom-controls {
+        flex-wrap: wrap; 
+        justify-content: center;
+        gap: 10px;
+    }
+    .modal-content {
+        padding: 20px;
+    }
+    .modal-character-name {
+        font-size: 1.5rem;
+    }
+    .modal-character-description {
+        font-size: 0.9rem;
+    }
+    .modal-character-power {
+        font-size: 0.8rem;
+    }
+    .close-button {
+        font-size: 30px;
+        top: 5px;
+        right: 10px;
+    }
+}

@@ -1,0 +1,321 @@
+{
+  "accessors": [
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 3711,
+      "max": [
+        0.3369329869747162,
+        1.7897510528564453,
+        0.758184552192688
+      ],
+      "min": [
+        -0.33816611766815186,
+        -0.01759902574121952,
+        -0.21966712176799774
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 44532,
+      "componentType": 5126,
+      "count": 3711,
+      "max": [
+        0.9985688924789429,
+        0.9998841881752014,
+        0.9999080896377563
+      ],
+      "min": [
+        -0.9996984601020813,
+        -0.9998024106025696,
+        -0.9999390244483948
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "count": 3711,
+      "max": [
+        0.9999401569366455,
+        0.9993472099304199,
+        0.999793291091919,
+        1.0
+      ],
+      "min": [
+        -0.9997879862785339,
+        -0.9999964833259583,
+        -0.9999270439147949,
+        -1.0
+      ],
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 3711,
+      "max": [
+        1.5297093391418457,
+        0.9960129857063293
+      ],
+      "min": [
+        0.004087999928742647,
+        0.0012821555137634277
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 29688,
+      "componentType": 5126,
+      "count": 3711,
+      "max": [
+        1.5297093391418457,
+        0.9960129857063293
+      ],
+      "min": [
+        0.004087999928742647,
+        0.0012821555137634277
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 59376,
+      "componentType": 5126,
+      "count": 3711,
+      "max": [
+        1.5297093391418457,
+        0.9960129857063293
+      ],
+      "min": [
+        0.004087999928742647,
+        0.0012821555137634277
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 89064,
+      "componentType": 5126,
+      "count": 3711,
+      "max": [
+        1.5297093391418457,
+        0.9960129857063293
+      ],
+      "min": [
+        0.004087999928742647,
+        0.0012821555137634277
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 118752,
+      "componentType": 5126,
+      "count": 3711,
+      "max": [
+        1.5297093391418457,
+        0.9960129857063293
+      ],
+      "min": [
+        0.004087999928742647,
+        0.0012821555137634277
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 0,
+      "componentType": 5125,
+      "count": 18486,
+      "type": "SCALAR"
+    }
+  ],
+  "asset": {
+    "extras": {
+      "author": "nadeabdu698 (https://sketchfab.com/nadeabdu698)",
+      "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+      "source": "https://sketchfab.com/3d-models/tung--sahur--game-3d-model-no-ai--free--download-972c3334a07147699987dddf446ebdee",
+      "title": "Tung_ Sahur_ Game_3D_model_NO_AI_ Free_ Download"
+    },
+    "generator": "Sketchfab-16.67.0",
+    "version": "2.0"
+  },
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 73944,
+      "name": "floatBufferViews",
+      "target": 34963
+    },
+    {
+      "buffer": 0,
+      "byteLength": 148440,
+      "byteOffset": 73944,
+      "byteStride": 8,
+      "name": "floatBufferViews",
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 89064,
+      "byteOffset": 222384,
+      "byteStride": 12,
+      "name": "floatBufferViews",
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 59376,
+      "byteOffset": 311448,
+      "byteStride": 16,
+      "name": "floatBufferViews",
+      "target": 34962
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 370824,
+      "uri": "scene.bin"
+    }
+  ],
+  "images": [
+    {
+      "uri": "textures/Sahur_baseColor.jpeg"
+    },
+    {
+      "uri": "textures/Sahur_metallicRoughness.png"
+    },
+    {
+      "uri": "textures/Sahur_normal.jpeg"
+    }
+  ],
+  "materials": [
+    {
+      "doubleSided": true,
+      "name": "Sahur",
+      "normalTexture": {
+        "index": 2
+      },
+      "occlusionTexture": {
+        "index": 1
+      },
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0
+        },
+        "metallicRoughnessTexture": {
+          "index": 1
+        }
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "Foot_LP_Plane_001_Sahur_0",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 1,
+            "POSITION": 0,
+            "TANGENT": 2,
+            "TEXCOORD_0": 3,
+            "TEXCOORD_1": 4,
+            "TEXCOORD_2": 5,
+            "TEXCOORD_3": 6,
+            "TEXCOORD_4": 7
+          },
+          "indices": 8,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "children": [
+        1
+      ],
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        2.220446049250313e-16,
+        -1.0,
+        0.0,
+        0.0,
+        1.0,
+        2.220446049250313e-16,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "Sketchfab_model"
+    },
+    {
+      "children": [
+        2
+      ],
+      "matrix": [
+        0.009999999776482582,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        2.2204459996194763e-18,
+        0.009999999776482582,
+        0.0,
+        0.0,
+        -0.009999999776482582,
+        2.2204459996194763e-18,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "USDRoot"
+    },
+    {
+      "mesh": 0,
+      "name": "Foot_LP_Plane_001_Sahur_0"
+    }
+  ],
+  "samplers": [
+    {
+      "magFilter": 9729,
+      "minFilter": 9987,
+      "wrapS": 10497,
+      "wrapT": 10497
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "Sketchfab_Scene",
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "sampler": 0,
+      "source": 0
+    },
+    {
+      "sampler": 0,
+      "source": 1
+    },
+    {
+      "sampler": 0,
+      "source": 2
+    }
+  ]
+}
