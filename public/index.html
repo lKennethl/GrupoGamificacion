@@ -14,7 +14,7 @@
       --background-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       --card-background: rgba(255, 255, 255, 0.95);
       --text-dark: #2c3e50;
-      --text-light: #ffffff;
+      --text-light: #ffffff;  
       --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -170,7 +170,7 @@
     .input-group input, .input-group select {
       width: 100%;
       padding: 1rem;
-      border: 2px solid rgba(0, 0, 0, 0.1);
+            border: 2px solid rgba(0, 0, 0, 0.1);
       border-radius: 15px;
       font-size: 1rem;
       font-family: inherit;
@@ -210,25 +210,6 @@
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
     }
     .action-button:active { transform: translateY(-1px); }
-    .guest-button {
-      background: linear-gradient(45deg, var(--success-color), #a29bfe);
-      color: var(--text-light);
-      padding: 1rem 2rem;
-      font-size: 1.1rem;
-      font-weight: bold;
-      border: none;
-      border-radius: 20px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-family: inherit;
-      width: 100%;
-      margin-top: 1rem;
-      animation: fadeInUp 1s ease-out 0.9s both;
-    }
-    .guest-button:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 10px 25px rgba(108, 92, 231, 0.4);
-    }
     .separator {
       display: flex;
       align-items: center;
@@ -385,8 +366,8 @@
       <form id="formLogin" novalidate>
         <div class="input-group">
           <label for="loginUsername">Usuario o Email:</label>
-          <input type="text" id="loginUsername" name="username" required placeholder="Ingresa tu usuario o email" autocomplete="username" />
-               </div>
+          <input type="text" id="loginUsername" name="usernameOrEmail" required placeholder="Ingresa tu usuario o email" autocomplete="username" />
+        </div>
         <div class="input-group">
           <label for="loginPassword">Contraseña:</label>
           <input type="password" id="loginPassword" name="password" required placeholder="Ingresa tu contraseña" autocomplete="current-password" />
@@ -396,6 +377,20 @@
           <div class="loading" id="loginLoading" aria-hidden="true"></div>
         </button>
       </form>
+
+      <!-- Recuperar cuenta login -->
+      <button type="button" class="action-button" style="background: #f39c12; color: white; margin-top: 0;" onclick="toggleRecover('login')">
+        ¿Olvidaste tu contraseña?
+      </button>
+      <form id="recoverLoginForm" class="form-section" style="margin-top: 1rem; display: none;">
+        <div class="input-group">
+          <label for="recoverLoginEmail">Ingresa tu email para recuperar cuenta:</label>
+          <input type="email" id="recoverLoginEmail" name="recoverEmail" placeholder="tu@email.com" required />
+        </div>
+        <button type="submit" class="action-button" style="background: #f39c12; color: white;">
+          Enviar enlace de recuperación
+        </button>
+      </form>
     </div>
 
     <!-- Formulario de Registro -->
@@ -403,31 +398,27 @@
       <form id="formRegister" novalidate>
         <div class="input-group">
           <label for="registerName">Nombre Completo:</label>
-          <input type="text" id="registerName" name="name" required placeholder="Tu nombre completo" autocomplete="name" />
+          <input type="text" id="registerName" name="nombre" required placeholder="Tu nombre completo" autocomplete="name" />
         </div>
         <div class="input-group">
           <label for="registerUsername">Usuario:</label>
-          <input type="text" id="registerUsername" name="username" required placeholder="Elige un nombre de usuario" autocomplete="username" />
+          <input type="text" id="registerUsername" name="usuario" required placeholder="Elige un nombre de usuario" autocomplete="username" />
         </div>
         <div class="input-group">
           <label for="registerEmail">Email:</label>
-          <input type="email" id="registerEmail" name="email" required placeholder="tu@email.com" autocomplete="email" />
+          <input type="email" id="registerEmail" name="correo" required placeholder="tu@email.com" autocomplete="email" />
         </div>
         <div class="input-group">
           <label for="registerPassword">Contraseña:</label>
-          <input type="password" id="registerPassword" name="password" required placeholder="Crea una contraseña segura" autocomplete="new-password" />
+          <input type="password" id="registerPassword" name="contraseña" required placeholder="Crea una contraseña segura" autocomplete="new-password" />
           <small id="passwordStrength" aria-live="polite"></small>
         </div>
         <div class="input-group">
-          <label for="registerGrade">Grado Escolar:</label>
-          <select id="registerGrade" name="grade" required>
-            <option value="">Selecciona tu grado</option>
-            <option value="1">1º de Primaria</option>
-            <option value="2">2º de Primaria</option>
-            <option value="3">3º de Primaria</option>
-            <option value="4">4º de Primaria</option>
-            <option value="5">5º de Primaria</option>
-            <option value="6">6º de Primaria</option>
+          <label for="registerCategory">Seleccionar categoría:</label>
+          <select id="registerCategory" name="tipo_usuario" required>
+            <option value="">Seleccionar categoría</option>
+            <option value="docente">Docente</option>
+            <option value="alumno">Alumno</option>
           </select>
         </div>
         <button type="submit" class="action-button register-btn">
@@ -436,11 +427,6 @@
         </button>
       </form>
     </div>
-
-    <!-- Botón continuar como invitado -->
-    <button class="guest-button" onclick="continueAsGuest()" type="button" aria-label="Continuar como invitado">
-      🎮 Continuar como Invitado
-    </button>
   </div>
 
   <script>
@@ -505,8 +491,11 @@
       return { text: '', color: '#000' };
     }
 
-    // Simulación de login (sin backend)
-    document.getElementById('formLogin').addEventListener('submit', (e) => {
+    // URL base backend
+    const API_BASE = 'http://localhost:3000';
+
+    // Login con backend
+    document.getElementById('formLogin').addEventListener('submit', async (e) => {
       e.preventDefault();
       clearMessages();
 
@@ -518,46 +507,120 @@
         return;
       }
 
-      // Simulación de éxito
-      showMessage('Ingreso exitoso. Redirigiendo...', 'success');
-      setTimeout(() => {
-        window.location.href = 'mejora2.html';
-      }, 1000);
+      try {
+        const res = await fetch(`${API_BASE}/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ usernameOrEmail, password }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          showMessage(data.error || 'Error en el login.', 'error');
+          return;
+        }
+        showMessage(data.message, 'success');
+        setTimeout(() => {
+          localStorage.setItem('token', data.token);
+          window.location.href = 'intro.html';
+        }, 1000);
+      } catch (err) {
+        showMessage('Error de conexión con el servidor.', 'error');
+      }
     });
 
-    // Simulación de registro (sin backend)
-    document.getElementById('formRegister').addEventListener('submit', (e) => {
+    // Registro con backend
+    document.getElementById('formRegister').addEventListener('submit', async (e) => {
       e.preventDefault();
       clearMessages();
 
-      const name = document.getElementById('registerName').value.trim();
-      const username = document.getElementById('registerUsername').value.trim();
-      const email = document.getElementById('registerEmail').value.trim();
-      const password = document.getElementById('registerPassword').value;
-      const grade = document.getElementById('registerGrade').value;
+      const nombre = document.getElementById('registerName').value.trim();
+      const usuario = document.getElementById('registerUsername').value.trim();
+      const correo = document.getElementById('registerEmail').value.trim();
+      const contraseña = document.getElementById('registerPassword').value;
+      const tipo_usuario = document.getElementById('registerCategory').value;
 
-      if (!name || !username || !email || !password || !grade) {
+      if (!nombre || !usuario || !correo || !contraseña || !tipo_usuario) {
         showMessage('Por favor, completa todos los campos.', 'error');
         return;
       }
 
-      const strength = getPasswordStrength(password);
+      const strength = getPasswordStrength(contraseña);
       if (strength.text === 'Contraseña débil') {
         showMessage('La contraseña es demasiado débil. Usa mayúsculas, números y símbolos.', 'error');
         return;
       }
 
-      // Simulación de éxito
-      showMessage('Registro exitoso. Redirigiendo...', 'success');
-      setTimeout(() => {
-        window.location.href = 'Seleccion de Personajes.html';
-      }, 1500);
+      try {
+        const bodyData = {
+          nombre,
+          usuario,
+          correo,
+          contraseña,
+          tipo_usuario
+        };
+
+        const res = await fetch(`${API_BASE}/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(bodyData),
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          showMessage(data.error || 'Error en el registro.', 'error');
+          return;
+        }
+        showMessage(data.message, 'success');
+        setTimeout(() => {
+          window.location.href = 'Seleccion de Personajes.html';
+        }, 1500);
+      } catch (err) {
+        showMessage('Error de conexión con el servidor.', 'error');
+      }
     });
 
-    // Continuar como invitado
-    window.continueAsGuest = function() {
-      window.location.href = 'intro.html';
-    };
+        // Recuperar contraseña login
+    document.getElementById('recoverLoginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearMessages();
+      const email = document.getElementById('recoverLoginEmail').value.trim();
+      if (!email) {
+        showMessage('Por favor, ingresa un email válido para recuperar la cuenta.', 'error');
+        return;
+      }
+      try {
+        const res = await fetch(`${API_BASE}/recover`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          showMessage(data.error || 'Error en la recuperación.', 'error');
+          return;
+        }
+        showMessage(data.message, 'success');
+        setTimeout(() => {
+          document.getElementById('recoverLoginForm').style.display = 'none';
+        }, 3000);
+      } catch (err) {
+        showMessage('Error de conexión con el servidor.', 'error');
+      }
+    });
+
+    // Mostrar/ocultar formulario de recuperación
+    function toggleRecover(formType) {
+      const recoverForm = document.getElementById(`recover${capitalize(formType)}Form`);
+      if (recoverForm.style.display === 'block') {
+        recoverForm.style.display = 'none';
+      } else {
+        recoverForm.style.display = 'block';
+      }
+    }
+
+    function capitalize(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
 
     // Caricatura sigue cursor
     document.addEventListener('mousemove', function(e) {

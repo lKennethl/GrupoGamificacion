@@ -324,19 +324,19 @@
     font-weight: bold;
     margin-bottom: 1rem;
   }
-  .rarity-common {
+  .rarity-comun {
     background: linear-gradient(45deg, #74b9ff, #0984e3);
     color: white;
   }
-  .rarity-rare {
+  .rarity-raro {
     background: linear-gradient(45deg, #a29bfe, #6c5ce7);
     color: white;
   }
-  .rarity-epic {
+  .rarity-epico {
     background: linear-gradient(45deg, #fd79a8, #e84393);
     color: white;
   }
-  .rarity-legendary {
+  .rarity-legendario {
     background: linear-gradient(45deg, #fdcb6e, #e17055);
     color: white;
     animation: legendaryGlow 2s infinite;
@@ -356,7 +356,7 @@
   .price-display {
     display: flex;
     align-items: center;
-    gap: 14px; /* Increased gap for better spacing */
+    gap: 14px;
     font-size: 1.3rem;
     font-weight: bold;
     color: var(--coin-color);
@@ -421,188 +421,178 @@
   .purchase-modal {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    background:rgba(0,0,0,0.8);
-    display: flex; justify-content: center; align-items: center;
-    z-index: 400;
-    opacity: 0; visibility: hidden;
-    transition: all 0.4s ease;
+    background:rgba(0,0,0,0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
   }
   .purchase-modal.show {
-    opacity: 1; visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
   }
   .modal-content {
     background: var(--card-gradient);
     border-radius: 25px;
-    padding: 3rem;
+    padding: 2rem;
     max-width: 600px;
     width: 90%;
-    box-shadow: 0 30px 70px rgba(0,0,0,0.4);
-    border: 3px solid rgba(78,205,196,0.4);
-    animation: modalSlideIn 0.8s cubic-bezier(0.175,0.885,0.32,1.275);
+    box-shadow: var(--shadow);
     text-align: center;
     position: relative;
   }
   .modal-character {
-    width: 300px;
+    width: 100%;
     height: 300px;
-    margin: 0 auto 1.5rem;
-    border-radius: 25px;
-    overflow: hidden;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    margin-bottom: 1rem;
   }
   .modal-character model-viewer {
     width: 100%;
     height: 100%;
-    border-radius: 25px;
+    border-radius: 20px;
   }
   .modal-title {
     font-size: 2rem;
-    color: var(--text-dark);
     font-weight: bold;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-dark);
   }
   .modal-message {
-    font-size: 1.2rem;
-    color: #636e72;
-    margin-bottom: 2rem;
-    line-height: 1.5;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: #555;
   }
   .modal-price {
     font-size: 1.5rem;
     font-weight: bold;
     color: var(--coin-color);
-    margin-bottom: 2rem;
-    padding: 15px;
-    background: rgba(243, 156, 18, 0.1);
-    border-radius: 15px;
-    border: 2px solid rgba(243, 156, 18, 0.3);
+    margin-bottom: 1.5rem;
   }
   .modal-buttons {
     display: flex;
-    gap: 15px;
     justify-content: center;
-    flex-wrap: wrap;
+    gap: 20px;
   }
   .modal-btn {
-    padding: 12px 25px;
+    padding: 12px 30px;
     font-size: 1.1rem;
     font-weight: bold;
+    border-radius: 25px;
     border: none;
-    border-radius: 20px;
     cursor: pointer;
-    transition: all 0.3s ease;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    min-width: 140px;
+    transition: background 0.3s ease;
   }
   .modal-btn.confirm {
-    background: linear-gradient(45deg, var(--success-color), #55efc4);
+    background: var(--success-color);
     color: white;
+  }
+  .modal-btn.confirm:hover {
+    background: #009f7f;
   }
   .modal-btn.cancel {
-    background: linear-gradient(45deg, var(--error-color), #d63031);
+    background: var(--error-color);
     color: white;
   }
-  .modal-btn:hover {
-    transform: translateY(-2px) scale(1.05);
+  .modal-btn.cancel:hover {
+    background: #c94a3f;
   }
+  /* Success modal */
   .success-modal {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.8);
-    display: flex; justify-content: center; align-items: center;
-    z-index: 500;
-    opacity: 0; visibility: hidden;
-    transition: all 0.4s ease;
+    background:rgba(0,0,0,0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
   }
   .success-modal.show {
-    opacity: 1; visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
   }
   .success-content {
-    background: linear-gradient(135deg, rgba(0, 184, 148, 0.95), rgba(85, 239, 196, 0.95));
+    background: var(--card-gradient);
     border-radius: 25px;
-    padding: 3rem;
-    text-align: center;
+    padding: 2rem;
     max-width: 500px;
     width: 90%;
-    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.4);
-    border: 3px solid rgba(255, 255, 255, 0.4);
-    animation: successSlideIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    color: white;
+    box-shadow: var(--shadow);
+    text-align: center;
+    position: relative;
   }
   .success-icon {
-    font-size: 5rem;
+    font-size: 4rem;
     margin-bottom: 1rem;
-    animation: successBounce 1s infinite;
   }
   .success-title {
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: bold;
-    margin-bottom: 1rem;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    margin-bottom: 0.5rem;
+    color: var(--success-color);
   }
   .success-message {
-    font-size: 1.3rem;
-    margin-bottom: 2rem;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+    color: #555;
   }
   .success-buttons {
     display: flex;
-    gap: 15px;
     justify-content: center;
-    flex-wrap: wrap;
+    gap: 20px;
   }
   .success-btn {
-    background: rgba(255, 255, 255, 0.9);
-    color: var(--text-dark);
     padding: 12px 25px;
     font-size: 1.1rem;
     font-weight: bold;
+    border-radius: 25px;
     border: none;
-    border-radius: 20px;
     cursor: pointer;
-    transition: all 0.3s ease;
-    min-width: 140px;
+    background: var(--primary-color);
+    color: white;
+    transition: background 0.3s ease;
   }
   .success-btn:hover {
-    background: white;
-    transform: translateY(-2px) scale(1.05);
+    background: #e04e4e;
   }
+  /* Animations */
   @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(50px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes cardShine {
-    0% { transform: rotate(45deg) translate(-200%, -200%); }
-    50% { transform: rotate(45deg) translate(-50%, -50%); }
-    100% { transform: rotate(45deg) translate(200%, 200%); }
-  }
-  @keyframes titleGlow {
-    0%, 100% { filter: brightness(1); }
-    50% { filter: brightness(1.2); }
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
   @keyframes coinGlow {
-    0%, 100% { box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); }
-    50% { box-shadow: 0 12px 30px rgba(243, 156, 18, 0.6); }
+    0%, 100% {
+      text-shadow: 0 0 10px #f39c12, 0 0 20px #f39c12;
+    }
+    50% {
+      text-shadow: 0 0 20px #f39c12, 0 0 30px #f39c12;
+    }
   }
-  @keyframes modalSlideIn {
-    from { opacity: 0; transform: translateY(-50px) scale(0.8); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-  }
-  @keyframes successSlideIn {
-    from { opacity: 0; transform: translateY(-100px) scale(0.5); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-  }
-  @keyframes successBounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+  @keyframes titleGlow {
+    0%, 100% {
+      text-shadow: 0 0 10px #4ecdc4, 0 0 20px #4ecdc4;
+    }
+    50% {
+      text-shadow: 0 0 20px #4ecdc4, 0 0 30px #4ecdc4;
+    }
   }
 </style>
-
 </head>
 <body>
 
   <!-- Scroll indicator -->
-  <div class="scroll-indicator" id="scrollIndicator"></div>
+  <div class="scroll-indicator" id="indicadorScroll"></div>
   <!-- Floating decorations -->
   <div class="floating-decoration decoration-1">🛒</div>
   <div class="floating-decoration decoration-2">👾</div>
@@ -617,36 +607,36 @@
       <div class="header-stats">
         <div class="coin-display" aria-label="Monedas disponibles">
           <span>🪙</span>
-          <span id="playerCoins">0</span>
+          <span id="monedasJugador">0</span>
           <span>Monedas</span>
         </div>
-        <button class="back-button" onclick="goBack()" aria-label="Volver al menú principal">🔙 Volver al Menú</button>
+        <button class="back-button" onclick="volverAlMenu()" aria-label="Volver al menú principal">🔙 Volver al Menú</button>
       </div>
     </div>
   </div>
   <!-- Main content -->
-  <div class="main-content">
+  <main class="main-content">
     <h1 class="main-title">🎭 Elige tu Compañero Perfecto</h1>
     <p class="main-subtitle">¡Descubre increíbles personajes 3D para acompañarte en tu aventura de aprendizaje!</p>
     <!-- Filters -->
     <div class="character-filters" role="group" aria-label="Filtros de personajes">
-      <button class="filter-btn active" onclick="filterCharacters('all')" aria-pressed="true">🌟 Todos</button>
-      <button class="filter-btn" onclick="filterCharacters('common')" aria-pressed="false">🔵 Común</button>
-      <button class="filter-btn" onclick="filterCharacters('rare')" aria-pressed="false">🟣 Raro</button>
-      <button class="filter-btn" onclick="filterCharacters('epic')" aria-pressed="false">🟡 Épico</button>
-      <button class="filter-btn" onclick="filterCharacters('legendary')" aria-pressed="false">🔥 Legendario</button>
-      <button class="filter-btn" onclick="filterCharacters('owned')" aria-pressed="false">✅ Comprados</button>
+      <button class="filter-btn active" data-filter="todos" aria-pressed="true">🌟 Todos</button>
+      <button class="filter-btn" data-filter="comun" aria-pressed="false">🔵 Común</button>
+      <button class="filter-btn" data-filter="raro" aria-pressed="false">🟣 Raro</button>
+      <button class="filter-btn" data-filter="epico" aria-pressed="false">🟡 Épico</button>
+      <button class="filter-btn" data-filter="legendario" aria-pressed="false">🔥 Legendario</button>
+      <button class="filter-btn" data-filter="comprados" aria-pressed="false">✅ Comprados</button>
     </div>
     <!-- Characters grid -->
-    <div class="characters-grid" id="charactersGrid" role="list"></div>
-  </div>
+    <div class="characters-grid" id="rejillaPersonajes" role="list"></div>
+  </main>
 
-  <!-- Purchase modal -->
-  <div class="purchase-modal" id="purchaseModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalMessage">
+  <!-- Modal de compra -->
+  <div class="purchase-modal" id="modalCompra" role="dialog" aria-modal="true" aria-labelledby="tituloModal" aria-describedby="mensajeModal" tabindex="-1">
     <div class="modal-content">
-      <div class="modal-character" id="modalCharacter">
+      <div class="modal-character" id="personajeModal">
         <model-viewer 
-          id="modalCharacterModel"
+          id="modeloPersonajeModal"
           src=""
           alt="Personaje 3D"
           camera-controls
@@ -659,321 +649,350 @@
           autoplay
         ></model-viewer>
       </div>
-      <h2 class="modal-title" id="modalTitle">¿Comprar Personaje?</h2>
-      <p class="modal-message" id="modalMessage">¿Estás seguro de que quieres comprar este increíble personaje?</p>
-      <div class="modal-price" id="modalPrice">🪙 50 Monedas</div>
+      <h2 class="modal-title" id="tituloModal">¿Comprar Personaje?</h2>
+      <p class="modal-message" id="mensajeModal">¿Estás seguro de que quieres comprar este increíble personaje?</p>
+      <div class="modal-price" id="precioModal">🪙 50 Monedas</div>
       <div class="modal-buttons">
-        <button class="modal-btn confirm" onclick="confirmPurchase()" aria-label="Confirmar compra">✅ Comprar</button>
-        <button class="modal-btn cancel" onclick="closePurchaseModal()" aria-label="Cancelar compra">❌ Cancelar</button>
+        <button class="modal-btn confirm" id="btnConfirmarCompra" aria-label="Confirmar compra">✅ Comprar</button>
+        <button class="modal-btn cancel" id="btnCancelarCompra" aria-label="Cancelar compra">❌ Cancelar</button>
       </div>
     </div>
   </div>
 
-  <!-- Success modal -->
-  <div class="success-modal" id="successModal" role="alertdialog" aria-modal="true" aria-labelledby="successTitle" aria-describedby="successMessage">
+  <!-- Modal de éxito -->
+  <div class="success-modal" id="modalExito" role="alertdialog" aria-modal="true" aria-labelledby="tituloExito" aria-describedby="mensajeExito" tabindex="-1">
     <div class="success-content">
       <div class="success-icon" aria-hidden="true">🎉</div>
-      <h2 class="success-title" id="successTitle">¡Compra Exitosa!</h2>
-      <p class="success-message" id="successMessage">Tu nuevo personaje ha sido añadido a "Mis Personajes"</p>
+      <h2 class="success-title" id="tituloExito">¡Compra Exitosa!</h2>
+      <p class="success-message" id="mensajeExito">Tu nuevo personaje ha sido añadido a "Mis Personajes"</p>
       <div class="success-buttons">
-        <button class="success-btn" onclick="goToMyCharacters()" aria-label="Ver mis personajes">👥 Ver Mis Personajes</button>
-        <button class="success-btn" onclick="closeSuccessModal()" aria-label="Seguir comprando">🛒 Seguir Comprando</button>
+        <button class="success-btn" id="btnVerMisPersonajes" aria-label="Ver mis personajes">👥 Ver Mis Personajes</button>
+        <button class="success-btn" id="btnSeguirComprando" aria-label="Seguir comprando">🛒 Seguir Comprando</button>
       </div>
     </div>
   </div>
 
 <script>
-  let playerCoins = 0;
-  let ownedCharacters = [];
-  let currentFilter = 'all';
-  let selectedCharacter = null;
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  // URL base del backend (ajusta según tu servidor)
+  const URL_BACKEND = 'http://localhost:3000';
 
-  // Characters database with only requested characters and corrected relative paths
-  const charactersDatabase = [
-    { id: 'balerina_capuchina', name: 'Balerina Capuchina', description: 'Una bailarina elegante y encantadora para acompañarte.', model: 'images/3D/balerina_capuchina/scene.gltf', price: 50, rarity: 'rare' },
-    { id: 'bombardino_crocodilo', name: 'Bombardino Crocodilo', description: 'Un cocodrilo musical con ritmo y estilo.', model: 'images/3D/bombardino_crocodilo/scene.gltf', price: 60, rarity: 'rare' },
-    { id: 'capuchino_assasino', name: 'Capuchino Asasino', description: 'Un ninja sigiloso con habilidades de café. ¡Despierta tu mente!', model: 'images/3D/capuchino_assasino/scene.gltf', price: 85, rarity: 'epic' },
-    { id: 'la_vaca_saturno_saturnito', name: 'La Vaca Saturno Saturnito', description: 'Una vaca espacial que te llevará a nuevas galaxias.', model: 'images/3D/la_vaca_saturno_saturnito/scene.gltf', price: 70, rarity: 'epic' },
-    { id: 'tralalero_tralala', name: 'Tralalero Tralala', description: 'Un personaje alegre y musical para animar tus días.', model: 'images/3D/tralalero_tralala/scene.gltf', price: 40, rarity: 'common' },
-    { id: 'tung_tung_sahur', name: 'Tung Tung Sahur', description: 'Un guerrero místico para tus aventuras.', model: 'images/3D/tung_tung_sahur/scene.gltf', price: 65, rarity: 'epic' },
-    { id: 'tung_tung_sahur_phase_2', name: 'Tung Tung Sahur Phase 2', description: 'Un guerrero místico en su segunda fase de evolución. Perfecto para aventuras épicas.', model: 'images/3D/tung_tung_sahur_phase_2/scene.gltf', price: 75, rarity: 'epic' },
-    { id: 'tung_tung_sahur_titan', name: 'Tung Tung Sahur Titan', description: 'La forma más poderosa del legendario Tung Tung. ¡Imparable en batalla!', model: 'images/3D/tung_tung_sahur_titan/scene.gltf', price: 150, rarity: 'legendary' },
-    { id: 'brr_brr_patapim_breakdance', name: 'Brr Brr Patapim Breakdance', description: 'La versión bailarina de Patapim. ¡Con movimientos increíbles!', model: 'images/3D/brr_brr_patapim_breakdance/scene.gltf', price: 60, rarity: 'rare' },
-    { id: 'brr_brr_patapim_dancing', name: 'Brr Brr Patapim Dancing', description: 'Patapim en modo fiesta. Perfecto para celebrar tus logros.', model: 'images/3D/brr_brr_patapim_dancing/scene.gltf', price: 55, rarity: 'rare' },
-    { id: 'capucchino_assesino', name: 'Capucchino Assesino', description: 'Un ninja sigiloso con habilidades de café. ¡Despierta tu mente!', model: 'images/3D/capucchino_assesino/scene.gltf', price: 85, rarity: 'epic' },
-    { id: 'chimpanzini_bananini', name: 'Chimpanzini Bananini', description: 'Un mono inteligente que ama las bananas y los libros.', model: 'images/3D/chimpanzini_bananini/scene.gltf', price: 40, rarity: 'common' },
-    { id: 'avocado_gorilla', name: 'Avocado Gorilla', description: 'Un gorila aguacate que te ayudará a mantener la calma.', model: 'images/3D/avocado_gorilla/scene.gltf', price: 45, rarity: 'rare' },
-    { id: 'shpioniro_golubiro', name: 'Shpioniro Golubiro', description: 'Un espía astuto y veloz.', model: 'images/3D/shpioniro_golubiro/scene.gltf', price: 65, rarity: 'epic' },
-    { id: 'skebob_v2', name: 'Skebob V2', description: 'La versión mejorada del clásico Skebob. ¡Más divertido que nunca!', model: 'images/3D/skebob_v2/scene.gltf', price: 70, rarity: 'epic' },
-    { id: 'tung_tung_sahur_destructor_astro_toilet', name: 'Tung Tung Destructor Astro Toilet', description: 'La forma más extraña y poderosa de Tung Tung. ¡Único en su especie!', model: 'images/3D/tung_tung_sahur_destructor_astro_toilet/scene.gltf', price: 180, rarity: 'legendary' }
-  ];
+  let monedasJugador = 0;
+  let personajesComprados = [];
+  let filtroActual = 'todos';
+  let personajeSeleccionado = null;
+  const esMovil = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-  // Load player coins from localStorage or default 100
-  function loadPlayerCoins() {
-    const coins = localStorage.getItem('totalCoins') || '100';
-    playerCoins = parseInt(coins, 10);
-    document.getElementById('playerCoins').textContent = playerCoins;
+  // Obtener monedas y personajes comprados del backend
+  async function cargarDatosJugador() {
+    try {
+      const resMonedas = await fetch(`${URL_BACKEND}/monedas`, {headers: { 'authorization': localStorage.getItem("token") }   });
+      if (!resMonedas.ok) throw new Error('Error al obtener monedas');
+      const dataMonedas = await resMonedas.json();
+      monedasJugador = dataMonedas.monedas || 0;
+      document.getElementById('monedasJugador').textContent = monedasJugador;
+
+      const resComprados = await fetch(`${URL_BACKEND}/api/personajes`, { 'authorization': localStorage.getItem("token")});
+      if (!resComprados.ok) throw new Error('Error al obtener personajes comprados');
+      personajesComprados = await resComprados.json();
+
+      await cargarPersonajesDisponibles();
+    } catch (error) {
+      alert('Error al cargar datos del jugador: ' + error.message);
+    }
   }
 
-  // Load owned characters from localStorage
-  function loadOwnedCharacters() {
-    const owned = localStorage.getItem('ownedCharacters');
-    ownedCharacters = owned ? JSON.parse(owned) : [];
+  // Obtener personajes disponibles del backend
+  let personajesDisponibles = [];
+  async function cargarPersonajesDisponibles() {
+    try {
+      const res = await fetch(`${URL_BACKEND}/api/personajes`, { credentials: 'include' });
+      if (!res.ok) throw new Error('Error al obtener personajes');
+      personajesDisponibles = await res.json();
+      renderizarPersonajes();
+    } catch (error) {
+      alert('Error al cargar personajes: ' + error.message);
+    }
   }
 
-  // Update coins display and storage
-  function updateCoins(amount) {
-    playerCoins += amount;
-    localStorage.setItem('totalCoins', playerCoins.toString());
-    document.getElementById('playerCoins').textContent = playerCoins;
+  // Traducción rareza
+  function textoRareza(rareza) {
+    const textos = {
+      comun: '🔵 Común',
+      raro: '🟣 Raro',
+      epico: '🟡 Épico',
+      legendario: '🔥 Legendario'
+    };
+    return textos[rareza] || rareza;
   }
 
-  // Render characters
-    function renderCharacters() {
-    const grid = document.getElementById('charactersGrid');
-    grid.innerHTML = '';
+  // Renderizar personajes en la grilla
+  function renderizarPersonajes() {
+    const rejilla = document.getElementById('rejillaPersonajes');
+    rejilla.innerHTML = '';
 
-    // New characters card (re-added)
-    const newCharCard = document.createElement('div');
-    newCharCard.className = 'new-characters-card';
-    newCharCard.setAttribute('role', 'listitem');
-    newCharCard.setAttribute('tabindex', '0');
-    newCharCard.innerHTML = `
+    // Tarjeta de nuevos personajes
+    const nuevaTarjeta = document.createElement('div');
+    nuevaTarjeta.className = 'new-characters-card';
+    nuevaTarjeta.setAttribute('role', 'listitem');
+    nuevaTarjeta.setAttribute('tabindex', '0');
+    nuevaTarjeta.innerHTML = `
       <div class="new-characters-icon" aria-hidden="true">✨</div>
       ¡Próximamente nuevos personajes increíbles!
       <br><small>¡Mantente atento para más sorpresas!</small>
     `;
-    grid.appendChild(newCharCard);
+    rejilla.appendChild(nuevaTarjeta);
 
-    let filteredCharacters = charactersDatabase;
-    if (currentFilter !== 'all') {
-      if (currentFilter === 'owned') {
-        filteredCharacters = charactersDatabase.filter(char =>
-          ownedCharacters.some(owned => owned.id === char.id)
-        );
+    let filtrados = personajesDisponibles;
+    if (filtroActual !== 'todos') {
+      if (filtroActual === 'comprados') {
+        filtrados = personajesDisponibles.filter(p => personajesComprados.some(pc => pc.id === p.id));
       } else {
-        filteredCharacters = charactersDatabase.filter(char => char.rarity === currentFilter);
+        filtrados = personajesDisponibles.filter(p => p.rareza === filtroActual);
       }
     }
 
-    if (filteredCharacters.length === 0) {
-      const noResult = document.createElement('div');
-      noResult.style.gridColumn = '1 / -1';
-      noResult.style.textAlign = 'center';
-      noResult.style.padding = '3rem';
-      noResult.style.color = 'white';
-      noResult.style.fontSize = '1.5rem';
-      noResult.setAttribute('role', 'listitem');
-      noResult.innerHTML = `
+    if (filtrados.length === 0) {
+      const sinResultados = document.createElement('div');
+      sinResultados.style.gridColumn = '1 / -1';
+      sinResultados.style.textAlign = 'center';
+      sinResultados.style.padding = '3rem';
+      sinResultados.style.color = 'white';
+      sinResultados.style.fontSize = '1.5rem';
+      sinResultados.setAttribute('role', 'listitem');
+      sinResultados.innerHTML = `
         <div style="font-size: 4rem; margin-bottom: 1rem;">😔</div>
         No se encontraron personajes con este filtro
       `;
-      grid.appendChild(noResult);
+      rejilla.appendChild(sinResultados);
       return;
     }
 
-    filteredCharacters.forEach((character, index) => {
-      const isOwned = ownedCharacters.some(owned => owned.id === character.id);
-      const canAfford = playerCoins >= character.price;
+    filtrados.forEach((personaje, i) => {
+      const comprado = personajesComprados.some(pc => pc.id === personaje.id);
+      const puedeComprar = monedasJugador >= personaje.precio;
 
-      const characterCard = document.createElement('div');
-      characterCard.className = `character-card ${isOwned ? 'owned' : ''}`;
-      characterCard.style.animationDelay = `${index * 0.1}s`;
-      characterCard.setAttribute('role', 'listitem');
-      characterCard.setAttribute('tabindex', '0');
+      const tarjeta = document.createElement('div');
+      tarjeta.className = `character-card ${comprado ? 'owned' : ''}`;
+      tarjeta.style.animationDelay = `${i * 0.1}s`;
+      tarjeta.setAttribute('role', 'listitem');
+      tarjeta.setAttribute('tabindex', '0');
 
-      characterCard.innerHTML = `
-        <div class="character-model" tabindex="0" aria-label="Modelo 3D de ${character.name}">
+      tarjeta.innerHTML = `
+        <div class="character-model" tabindex="0" aria-label="Modelo 3D de ${personaje.nombre}">
           <model-viewer 
-            src="${character.model}"
-            alt="${character.name}"
+            src="${personaje.modelo}"
+            alt="${personaje.nombre}"
             camera-controls
             auto-rotate
-            rotation-per-second="${isMobile ? '10deg' : '15deg'}"
+            rotation-per-second="${esMovil ? '10deg' : '15deg'}"
             shadow-intensity="1"
             environment-image="neutral"
             exposure="1"
             loading="eager"
-            interaction-prompt="${isMobile ? 'none' : 'auto'}"
-            autoplay
+            interaction-prompt="${esMovil ? 'none' : 'auto'}"
           ></model-viewer>
-          <button class="expand-btn" aria-label="Ampliar modelo 3D de ${character.name}" onclick="open3DViewer('${character.model}', '${character.name}')">+</button>
+          <button class="expand-btn" aria-label="Ampliar modelo 3D de ${personaje.nombre}" onclick="abrirVisor3D('${personaje.modelo}', '${personaje.nombre}')">🔍</button>
         </div>
         <div class="character-info">
-          <h3 class="character-name">${character.name}</h3>
-          <p class="character-description">${character.description}</p>
-          <span class="character-rarity rarity-${character.rarity}">
-            ${getRarityText(character.rarity)}
-          </span>
+          <h3 class="character-name">${personaje.nombre}</h3>
+          <p class="character-description">${personaje.descripcion}</p>
+          <span class="character-rarity rarity-${personaje.rareza}">${textoRareza(personaje.rareza)}</span>
           <div class="character-price">
-            <div class="price-display" aria-label="Precio: ${character.price} monedas">
-              <span>🪙</span>
-              <span>${character.price}</span>
+            <div class="price-display" aria-label="Precio: ${personaje.precio} monedas">
+              🪙 ${personaje.precio}
             </div>
             <button 
-              class="buy-button ${isOwned ? 'owned' : ''}" 
-              ${isOwned ? 'disabled' : ''}
-              ${!canAfford && !isOwned ? 'disabled' : ''}
-              onclick="${isOwned ? `selectCharacter('${character.id}')` : `openPurchaseModal('${character.id}')`}"
-              aria-label="${isOwned ? 'Seleccionar personaje ' + character.name : (canAfford ? 'Comprar personaje ' + character.name : 'No tienes monedas suficientes para comprar ' + character.name)}"
+              class="buy-button ${comprado ? 'owned' : ''}" 
+              ${comprado ? 'disabled aria-disabled="true"' : (!puedeComprar ? 'disabled aria-disabled="true"' : '')}
+              aria-label="${comprado ? 'Personaje comprado' : puedeComprar ? 'Comprar personaje' : 'No tienes suficientes monedas para comprar este personaje'}"
+              onclick="abrirModalCompra(${personaje.id})"
             >
-              ${isOwned ? '✅ Seleccionar' : (canAfford ? '🛒 Comprar' : '💰 Sin fondos')}
+              ${comprado ? 'Comprado' : 'Comprar'}
             </button>
           </div>
         </div>
       `;
-
-      grid.appendChild(characterCard);
+      rejilla.appendChild(tarjeta);
     });
   }
 
-  function getRarityText(rarity) {
-    const rarityTexts = {
-      common: '🔵 Común',
-      rare: '🟣 Raro',
-      epic: '🟡 Épico',
-      legendary: '🔥 Legendario'
-    };
-    return rarityTexts[rarity] || rarity;
-  }
+  // Cambiar filtro
+  function cambiarFiltro(e) {
+    const btn = e.target;
+    if (!btn.classList.contains('filter-btn')) return;
 
-  function filterCharacters(filter) {
-    currentFilter = filter;
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-      btn.classList.remove('active');
-      btn.setAttribute('aria-pressed', 'false');
+    document.querySelectorAll('.filter-btn').forEach(b => {
+      b.classList.remove('active');
+      b.setAttribute('aria-pressed', 'false');
     });
-    event.target.classList.add('active');
-    event.target.setAttribute('aria-pressed', 'true');
-    renderCharacters();
+    btn.classList.add('active');
+    btn.setAttribute('aria-pressed', 'true');
+
+    filtroActual = btn.getAttribute('data-filter');
+    renderizarPersonajes();
   }
 
-  function openPurchaseModal(characterId) {
-    const character = charactersDatabase.find(char => char.id === characterId);
-    if (!character) return;
-    selectedCharacter = character;
-    const modalModel = document.getElementById('modalCharacterModel');
-    modalModel.src = character.model;
-    modalModel.setAttribute('rotation-per-second', isMobile ? '10deg' : '20deg');
-    modalModel.setAttribute('interaction-prompt', isMobile ? 'none' : 'auto');
-    document.getElementById('modalTitle').textContent = `¿Comprar ${character.name}?`;
-    document.getElementById('modalMessage').textContent = character.description;
-    document.getElementById('modalPrice').innerHTML = `🪙 ${character.price} Monedas`;
-    document.getElementById('purchaseModal').classList.add('show');
+  // Abrir modal compra
+  function abrirModalCompra(idPersonaje) {
+    personajeSeleccionado = personajesDisponibles.find(p => p.id === idPersonaje);
+    if (!personajeSeleccionado) return;
+
+    const modal = document.getElementById('modalCompra');
+    const modeloModal = document.getElementById('modeloPersonajeModal');
+    const tituloModal = document.getElementById('tituloModal');
+    const mensajeModal = document.getElementById('mensajeModal');
+    const precioModal = document.getElementById('precioModal');
+    const btnConfirmar = document.getElementById('btnConfirmarCompra');
+
+    modeloModal.src = personajeSeleccionado.modelo;
+    modeloModal.alt = personajeSeleccionado.nombre;
+    tituloModal.textContent = `Comprar "${personajeSeleccionado.nombre}"`;
+    mensajeModal.textContent = personajeSeleccionado.descripcion;
+    precioModal.textContent = `🪙 ${personajeSeleccionado.precio} Monedas`;
+
+    btnConfirmar.disabled = monedasJugador < personajeSeleccionado.precio;
+    btnConfirmar.setAttribute('aria-disabled', btnConfirmar.disabled ? 'true' : 'false');
+
+    modal.classList.add('show');
+    modal.focus();
   }
 
-  function closePurchaseModal() {
-    document.getElementById('purchaseModal').classList.remove('show');
-    selectedCharacter = null;
+  // Cerrar modal compra
+  function cerrarModalCompra() {
+    const modal = document.getElementById('modalCompra');
+    modal.classList.remove('show');
+    personajeSeleccionado = null;
   }
 
-  function confirmPurchase() {
-    if (!selectedCharacter) return;
-    if (playerCoins < selectedCharacter.price) {
-      alert('💰 No tienes suficientes monedas para comprar este personaje.\n\n¡Sigue jugando para ganar más monedas!');
+  // Confirmar compra (envía al backend)
+  async function confirmarCompra() {
+    if (!personajeSeleccionado) return;
+
+    if (monedasJugador < personajeSeleccionado.precio) {
+      alert('No tienes suficientes monedas para comprar este personaje.');
       return;
     }
-    updateCoins(-selectedCharacter.price);
-    ownedCharacters.push({
-      id: selectedCharacter.id,
-      name: selectedCharacter.name,
-      model: selectedCharacter.model,
-      purchaseDate: new Date().toISOString()
-    });
-    localStorage.setItem('ownedCharacters', JSON.stringify(ownedCharacters));
-    closePurchaseModal();
-    showSuccessModal();
-    renderCharacters();
+
+    try {
+      const res = await fetch(`${URL_BACKEND}/personajes/comprar`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idPersonaje: personajeSeleccionado.id })
+      });
+      if (!res.ok) {
+        const errorData= await res.json();
+        throw new Error(errorData.mensaje || 'Error al procesar la compra');
+      }
+      const data = await res.json();
+      // Actualizar monedas y personajes comprados localmente
+      monedasJugador = data.monedasActualizadas;
+      personajesComprados = data.personajesComprados;
+      document.getElementById('monedasJugador').textContent = monedasJugador;
+      cerrarModalCompra();
+      mostrarModalExito();
+      renderizarPersonajes();
+    } catch (error) {
+      alert('Error en la compra: ' + error.message);
+    }
   }
 
-  function showSuccessModal() {
-    document.getElementById('successMessage').textContent = `¡${selectedCharacter.name} ha sido añadido a "Mis Personajes"!`;
-    document.getElementById('successModal').classList.add('show');
+  // Mostrar modal éxito
+  function mostrarModalExito() {
+    const modalExito = document.getElementById('modalExito');
+    const mensajeExito = document.getElementById('mensajeExito');
+    mensajeExito.textContent = `¡${personajeSeleccionado.nombre} ha sido añadido a "Mis Personajes"!`;
+    modalExito.classList.add('show');
+    modalExito.focus();
   }
 
-  function closeSuccessModal() {
-    document.getElementById('successModal').classList.remove('show');
+  // Cerrar modal éxito
+  function cerrarModalExito() {
+    const modalExito = document.getElementById('modalExito');
+    modalExito.classList.remove('show');
   }
 
-  function selectCharacter(characterId) {
-    const character = ownedCharacters.find(char => char.id === characterId);
-    if (!character) return;
-    localStorage.setItem('selectedCharacter', JSON.stringify(character));
-    alert(`✅ ¡${character.name} seleccionado!\n\nAhora será tu compañero en todas las aventuras.`);
-  }
-
-  function goToMyCharacters() {
-    closeSuccessModal();
+  // Ver mis personajes (redirigir)
+  function verMisPersonajes() {
+    cerrarModalExito();
     window.location.href = 'mis-personajes.html';
   }
 
-  function goBack() {
+  // Seguir comprando
+  function seguirComprando() {
+    cerrarModalExito();
+  }
+
+  // Volver al menú principal
+  function volverAlMenu() {
     window.location.href = 'intro.html';
   }
 
-  function initScrollIndicator() {
-    const indicator = document.getElementById('scrollIndicator');
+  // Indicador de scroll
+  function inicializarIndicadorScroll() {
+    const indicador = document.getElementById('indicadorScroll');
     window.addEventListener('scroll', () => {
       const scrollTop = window.pageYOffset;
       const docHeight = document.documentElement.scrollHeight - window.innerHeight;
       const scrollPercent = docHeight > 0 ? (scrollTop / docHeight) : 0;
-      indicator.style.width = (scrollPercent * 100) + '%';
+      indicador.style.width = (scrollPercent * 100) + '%';
     });
   }
 
-  function initDragScroll() {
-    let isDragging = false;
-    let startY = 0;
-    let startScrollTop = 0;
+  // Scroll con arrastre
+  function inicializarScrollArrastre() {
+    let arrastrando = false;
+    let inicioY = 0;
+    let inicioScrollTop = 0;
 
-    function isInteractiveElement(target) {
+    function esElementoInteractivo(target) {
       return target.closest('.character-card') || target.closest('.modal-content') || target.closest('button') || target.closest('model-viewer');
     }
 
     document.addEventListener('mousedown', e => {
-      if (isInteractiveElement(e.target)) return;
-      isDragging = true;
-      startY = e.clientY;
-      startScrollTop = window.pageYOffset;
+      if (esElementoInteractivo(e.target)) return;
+      arrastrando = true;
+      inicioY = e.clientY;
+      inicioScrollTop = window.pageYOffset;
       document.body.classList.add('dragging');
       e.preventDefault();
     });
     document.addEventListener('mousemove', e => {
-      if (!isDragging) return;
-      const deltaY = startY - e.clientY;
-      window.scrollTo(0, startScrollTop + deltaY);
+      if (!arrastrando) return;
+      const deltaY = inicioY - e.clientY;
+      window.scrollTo(0, inicioScrollTop + deltaY);
       e.preventDefault();
     });
     document.addEventListener('mouseup', () => {
-      isDragging = false;
+      arrastrando = false;
       document.body.classList.remove('dragging');
     });
 
     document.addEventListener('touchstart', e => {
-      if (isInteractiveElement(e.target)) return;
-      isDragging = true;
-      startY = e.touches[0].clientY;
-      startScrollTop = window.pageYOffset;
+      if (esElementoInteractivo(e.target)) return;
+      arrastrando = true;
+      inicioY = e.touches[0].clientY;
+      inicioScrollTop = window.pageYOffset;
     }, { passive: true });
     document.addEventListener('touchmove', e => {
-      if (!isDragging) return;
-      const deltaY = startY - e.touches[0].clientY;
-      window.scrollTo(0, startScrollTop + deltaY);
+      if (!arrastrando) return;
+      const deltaY = inicioY - e.touches[0].clientY;
+      window.scrollTo(0, inicioScrollTop + deltaY);
     }, { passive: true });
     document.addEventListener('touchend', () => {
-      isDragging = false;
+      arrastrando = false;
     });
   }
 
-  function open3DViewer(modelSrc, modelName) {
-    if (document.getElementById('viewer3DModal')) return;
+  // Abrir visor 3D ampliado
+  function abrirVisor3D(modeloSrc, nombreModelo) {
+    if (document.getElementById('visor3DModal')) return;
 
     const modal = document.createElement('div');
-    modal.id = 'viewer3DModal';
+    modal.id = 'visor3DModal';
     modal.setAttribute('role', 'dialog');
     modal.setAttribute('aria-modal', 'true');
-    modal.setAttribute('aria-label', `Visor 3D ampliado de ${modelName}`);
+    modal.setAttribute('aria-label', `Visor 3D ampliado de ${nombreModelo}`);
     modal.style.cssText = `
       position: fixed; top:0; left:0; width:100%; height:100%;
       background: rgba(0,0,0,0.9);
@@ -982,8 +1001,8 @@
       cursor: grab;
     `;
 
-    const viewerContainer = document.createElement('div');
-    viewerContainer.style.cssText = `
+    const contenedor = document.createElement('div');
+    contenedor.style.cssText = `
       width: 90vw; max-width: 800px; height: 90vh; border-radius: 25px; overflow: hidden;
       box-shadow: 0 0 40px rgba(255,255,255,0.3);
       background: #222;
@@ -992,8 +1011,8 @@
     `;
 
     const modelViewer = document.createElement('model-viewer');
-    modelViewer.src = modelSrc;
-    modelViewer.alt = modelName;
+    modelViewer.src = modeloSrc;
+    modelViewer.alt = nombreModelo;
     modelViewer.setAttribute('camera-controls', '');
     modelViewer.setAttribute('auto-rotate', '');
     modelViewer.setAttribute('rotation-per-second', '15deg');
@@ -1006,47 +1025,58 @@
     modelViewer.style.height = '100%';
     modelViewer.style.borderRadius = '25px';
 
-    const closeBtn = document.createElement('button');
-    closeBtn.textContent = '✕';
-    closeBtn.setAttribute('aria-label', 'Cerrar visor 3D ampliado');
-    closeBtn.style.cssText = `
+    const btnCerrar = document.createElement('button');
+    btnCerrar.textContent = '✕';
+    btnCerrar.setAttribute('aria-label', 'Cerrar visor 3D ampliado');
+    btnCerrar.style.cssText = `
       position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.2);
       border: none; color: white; font-size: 2rem; border-radius: 50%;
       width: 40px; height: 40px; cursor: pointer; transition: background 0.3s ease;
       z-index: 10;
     `;
-    closeBtn.onmouseenter = () => closeBtn.style.background = 'rgba(255,255,255,0.6)';
-    closeBtn.onmouseleave = () => closeBtn.style.background = 'rgba(255,255,255,0.2)';
-    closeBtn.onclick = () => {
+    btnCerrar.onmouseenter = () => btnCerrar.style.background = 'rgba(255,255,255,0.6)';
+    btnCerrar.onmouseleave = () => btnCerrar.style.background = 'rgba(255,255,255,0.2)';
+    btnCerrar.onclick = () => {
       document.body.removeChild(modal);
       document.body.style.overflow = '';
     };
 
-    viewerContainer.appendChild(modelViewer);
-    viewerContainer.appendChild(closeBtn);
-    modal.appendChild(viewerContainer);
+    contenedor.appendChild(modelViewer);
+    contenedor.appendChild(btnCerrar);
+    modal.appendChild(contenedor);
     document.body.appendChild(modal);
 
     document.body.style.overflow = 'hidden';
   }
 
+  // Inicialización al cargar la página
   window.addEventListener('load', () => {
-    loadPlayerCoins();
-    loadOwnedCharacters();
-    renderCharacters();
-    initScrollIndicator();
-    initDragScroll();
+    cargarDatosJugador();
+    inicializarIndicadorScroll();
+    inicializarScrollArrastre();
   });
 
-  window.filterCharacters = filterCharacters;
-  window.openPurchaseModal = openPurchaseModal;
-  window.closePurchaseModal = closePurchaseModal;
-  window.confirmPurchase = confirmPurchase;
-  window.closeSuccessModal = closeSuccessModal;
-  window.selectCharacter = selectCharacter;
-  window.goToMyCharacters = goToMyCharacters;
-  window.goBack = goBack;
-  window.open3DViewer = open3DViewer;
+  // Asignar funciones globales para uso en HTML
+  window.cambiarFiltro = cambiarFiltro;
+  window.abrirModalCompra = abrirModalCompra;
+  window.cerrarModalCompra = cerrarModalCompra;
+  window.confirmarCompra = confirmarCompra;
+  window.cerrarModalExito = cerrarModalExito;
+  window.verMisPersonajes = verMisPersonajes;
+  window.seguirComprando = seguirComprando;
+  window.volverAlMenu = volverAlMenu;
+  window.abrirVisor3D = abrirVisor3D;
+
+  // Asignar eventos a botones del modal para accesibilidad y evitar inline JS
+  document.getElementById('btnConfirmarCompra').addEventListener('click', confirmarCompra);
+  document.getElementById('btnCancelarCompra').addEventListener('click', cerrarModalCompra);
+  document.getElementById('btnVerMisPersonajes').addEventListener('click', verMisPersonajes);
+  document.getElementById('btnSeguirComprando').addEventListener('click', seguirComprando);
+
+  // Asignar eventos a botones de filtro
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', cambiarFiltro);
+  });
 </script>
 
 </body>
